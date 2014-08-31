@@ -3,12 +3,13 @@
 
 #include "stdafx.h"
 #include <windows.h>
-#include "grafbase.h"
+//#include "grafbase.h"
 #include "PolyFill.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include <wchar.h>
 
 #define PI 3.1415926535897932384626433832795
 #define ENTER 13
@@ -31,7 +32,7 @@ int mouse_x, mouse_y;
 static BOOL graphics = TRUE;                /* Boolean, enable graphics?  */
 
 //static short draw_color = MY_WHITE;        /* Current drawing color.     */
-char buffer[200] = "";					// string buffer for keyboard input
+				// string buffer for keyboard input
 std::vector<bool> pattern = { 1, 1, 1, 1, 1, 1, 1, 1 };
 
 static COLORREF win_draw_color = RGB(255, 255, 255);  // current draw color
@@ -85,23 +86,44 @@ class Shape {
 	*  Caution!! GpiSetPel has been found to crash programs at some locations!  *
 	****************************************************************************/
 	public:
-	void DrawPixel(int x, int y)
+	static void DrawPixel(int x, int y)
 	{
 		SetPixel(hdc, x, y, win_draw_color);
 	}
 
-	void DrawXorPixel(int x, int y)
+	static void DrawXorPixel(int x, int y)
 	{
 		unsigned int mask = win_draw_color;
 		COLORREF cor = GetPixel(hdc, x, y);
 		cor ^= mask; // bit-bit Xor operation mask with color
 		SetPixel(hdc, x, y, cor);
 	}
+	static void DrawXorLine(int x1, int y1, int x2, int y2)
+	{
+		int i, length;
+		float  x, y, dx, dy;
+
+		length = Max(abs(x2 - x1), abs(y2 - y1));
+
+		if (length>0)
+		{
+			dx = ((float)(x2 - x1)) / length;
+			dy = ((float)(y2 - y1)) / length;
+			x = (float)x1; y = (float)y1;
+			for (i = 0; i <= length; i++)
+			{
+				if (pattern[i%pattern.size()]) DrawXorPixel(Arred(x), Arred(y));
+				x = x + dx;    // dx = 1 ou -1 ou m
+				y = y + dy;   // yx = 1 ou -1 ou 1/m
+			}
+		}
+	}
 };
 
 class Polygon: public Shape {
 
-	void DrawXorLine(int x1, int y1, int x2, int y2)
+public:
+	static void DrawXorLine(int x1, int y1, int x2, int y2)
 	{
 		int i, length;
 		float  x, y, dx, dy;
@@ -126,7 +148,7 @@ class Polygon: public Shape {
 
 class Line: public Shape{
 
-	void DDA(int x1, int y1, int x2, int y2)
+	static void DDA(int x1, int y1, int x2, int y2)
 	{   // Atenção: x, y, dx, dy real  e i, length inteiro
 		int length;
 		float x, y, dx, dy;
@@ -146,8 +168,8 @@ class Line: public Shape{
 		}
 	}
 
-	void Bresenham(int x1, int y1, int x2, int y2) {
-		int x, y, dx, dy, sx, sy, err, e2;
+	static void Bresenham(int x1, int y1, int x2, int y2) {
+		int dx, dy, sx, sy, err, e2;
 		int i = 0;
 		dx = abs(x2 - x1);
 		dy = abs(y2 - y1);
@@ -172,7 +194,7 @@ class Line: public Shape{
 };
 
 class Circle: public Shape{
-	void PlotCircle(int xc, int yc, int x, int y)
+	static void PlotCircle(int xc, int yc, int x, int y)
 	{
 		DrawXorPixel(xc + x, yc + y);
 		DrawXorPixel(xc + y, yc + x);
@@ -184,7 +206,7 @@ class Circle: public Shape{
 		DrawXorPixel(xc - x, yc + y);
 	}
 
-	void CircleBresenham(int xc, int yc, int r) {
+	static void CircleBresenham(int xc, int yc, int r) {
 		int x, y, d, deltaE, deltaSE;
 		int i = 0;
 		x = 0; y = r;
@@ -216,12 +238,20 @@ class Circle: public Shape{
 
 class Window {
 
-	static SHORT numXpixels;
-	static SHORT numYpixels;
+	//static SHORT numXpixels;
+	//static SHORT numYpixels;
+	//static int start_text_y;
+	//static int end_text_y;
+	SHORT numXpixels;
+	SHORT numYpixels;
 	int start_text_y;
-	int end_text_y;	
+	int end_text_y;
+	wchar_t wind_name = L'Lab 01 CCI-36     ';
+	wchar_t wind_class = L'Window Application';
 
 	public:
+	static char buffer[200];
+
 	Window(){
 		numXpixels = 500;   //640;			// size of window in X
 		numYpixels = 500;   //480           // size of window in Y
@@ -274,10 +304,12 @@ class Window {
 		}
 
 	}
+
 	void ClearString(char *str)
 	{
 		str[0] = 0x00;
 	}
+
 	void EraseMessage()
 	{
 		RECT rec = { START_TEXT_X, start_text_y,
@@ -286,7 +318,7 @@ class Window {
 		// Clear input input box
 		FillRect(hdc, &rec, backgrdBrush);
 	}
-	void  PrintMessage(char *buffer)
+	void PrintMessage(char *buffer)
 	{
 		// Write input text in the graphics window
 		// Input line is in the upper portion of the graphics window
@@ -295,30 +327,10 @@ class Window {
 
 	}
 
-	int GetPixel(int x, int y)
+	int GetPixels(int x, int y)
 	{
 		return (int)GetPixel(hdc, x, y);
 	}
-
-
-	/****************************************************************************
-	*  Reset display to default mode.                                           *
-	****************************************************************************/
-	void CloseGraphics(void)
-	{
-
-		// Delete pen and destroy window
-		DeleteObject(hpen);
-		ReleaseDC(WinHandle, hdc);
-		DestroyWindow(WinHandle);          /* Tidy up...                 */
-	}
-};
-
-
-
-class Program{
-
-
 
 	/****************************************************************************
 	*                                                                           *
@@ -332,8 +344,7 @@ class Program{
 	*                                                                           *
 	****************************************************************************/
 
-	wchar_t wind_class[] = L"Window Application";
-	wchar_t wind_name[] = L"Lab 01 CCI-36     ";
+	
 	void InitGraphics()
 	{
 
@@ -398,7 +409,176 @@ class Program{
 
 	}
 
+	/****************************************************************************
+	*  Reset display to default mode.                                           *
+	****************************************************************************/
+	void CloseGraphics(void)
+	{
+
+		// Delete pen and destroy window
+		DeleteObject(hpen);
+		ReleaseDC(WinHandle, hdc);
+		DestroyWindow(WinHandle);          /* Tidy up...                 */
+	}
+
+	/****************************************************************************
+	*  Mouse Handler for Win 95                                                   *
+	****************************************************************************/
+	LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
+	{
+
+		PAINTSTRUCT ps;
+
+		char str[3] = " ";
+		switch (messg)
+		{
+
+		case WM_PAINT:
+			BeginPaint(hWnd, &ps);
+			PrintMessage(buffer);
+
+			ValidateRect(hWnd, NULL);
+
+			EndPaint(hWnd, &ps);
+			break;
+		case WM_CHAR:
+		{
+						// Win32 keyboard message: lParam=key code wParam= virtual key (ASCII) code 
+
+						if (!(LOWORD(wParam) & KF_UP) &&
+							!(LOWORD(wParam) & KF_ALTDOWN))
+
+						{
+							//  take keyboard input
+							key_input = (char)LOWORD(wParam);
+
+
+
+							if (key_input == ENTER) // Enter
+							{
+								EraseMessage();
+								//buffer[strlen(buffer)]=0x00;
+							}
+							else if (key_input == BACKSPACE) // BackSpace
+							{
+								if (strlen(buffer)>0)
+								{
+									int len = strlen(buffer) - 1;
+									// Clear last character in buffer
+									buffer[len] = ' ';
+									// Clear characters in input box
+									strcat_s(buffer, "   ");
+									PrintMessage(buffer);
+									buffer[len] = 0x00; // put end string
+								}
+							}
+							else if (key_input>31 && key_input<130)
+							{
+								int leng = strlen(buffer);
+								EraseMessage();
+								str[0] = key_input;
+								strcat_s(buffer, str); // add char
+								// display, update input box
+								PrintMessage(buffer);
+							}
+							else if (key_input != ESC) //ESC
+								key_input = -1;
+							break;
+						}
+		}
+		case WM_SIZE:
+			// resize 
+			SetMaxX(LOWORD(lParam));  // width of client area 
+			SetMaxY(HIWORD(lParam));
+			PostMessage(WinHandle, WM_PAINT, wParam, lParam);
+
+			break;
+		case WM_MOUSEMOVE:
+
+		{     key_input = wParam;
+		if (key_input == MK_LBUTTON)
+
+		{
+			EraseMessage();
+			mouse_x = LOWORD(lParam);
+			mouse_y = HIWORD(lParam);
+			key_input = wParam;
+			printf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
+			PrintMessage(buffer);
+			mouse_action = L_MOUSE_MOVE_DOWN;
+			ClearString(buffer);
+		}
+		break;
+		}
+		case WM_LBUTTONDOWN:
+
+		{
+
+							   EraseMessage();
+							   mouse_x = LOWORD(lParam);
+							   mouse_y = HIWORD(lParam);
+							   key_input = wParam;
+							   printf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
+							   PrintMessage(buffer);
+							   mouse_action = L_MOUSE_DOWN;
+							   ClearString(buffer);
+							   break;
+		}
+		case WM_LBUTTONUP:
+
+		{
+
+							 EraseMessage();
+							 mouse_x = LOWORD(lParam);
+							 mouse_y = HIWORD(lParam);
+							 key_input = wParam;
+							 sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
+							 PrintMessage(buffer);
+							 mouse_action = L_MOUSE_UP;
+							 ClearString(buffer);
+							 break;
+		}
+
+		case WM_RBUTTONDOWN:
+		{
+							   EraseMessage();
+							   key_input = wParam;
+							   mouse_x = LOWORD(lParam);
+							   mouse_y = HIWORD(lParam);
+
+							   sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
+							   PrintMessage(buffer);
+
+							   mouse_action = R_MOUSE_DOWN;
+							   ClearString(buffer);
+
+							   break;
+		}
+		case WM_LBUTTONDBLCLK:
+			EraseMessage();
+			mouse_x = LOWORD(lParam);
+			mouse_y = HIWORD(lParam);
+			key_input = wParam;
+			sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
+			PrintMessage(buffer);
+			mouse_action = L_DOUBLE_CLICK;
+			ClearString(buffer);
+			key_input = wParam;
+
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return(DefWindowProc(hWnd, messg, wParam, lParam));
+			break;
+		}
+
+		return 0;
+
+	}
 };
+
 
 
 /****************************************************************************
@@ -424,6 +604,10 @@ void SetGraphicsColor(int new_color, int width)
 	}
 }
 
+/*int distance(int x1, int y1, int x2, int y2){
+	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+}*/
+
 void SetGraphicsPatern(int new_pattern){
 	switch (new_pattern){
 	case FULL:
@@ -443,208 +627,37 @@ void SetGraphicsPatern(int new_pattern){
 	}
 }
 
-/****************************************************************************
-*  Returns the color value of the pixel at the specified point on the       *
-*  screen.                                                                  *
-****************************************************************************/
-
-
-int distance(int x1, int y1, int x2, int y2){
-	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
-}
 
 void Draw(int x1, int y1, int x2, int y2){
-
-	switch (shape)
-	{
-	case LINEDDA:
-		DrawXorLine(x1, y1, x2, y2);
-		break;
-	case BRESENHAM:
-		Bresenham(x1, y1, x2, y2);
-		break;
-	case CIRCLE:
-		CircleBresenham(x1, y1, distance(x1, y1, x2, y2));
-		break;
-	default:
-		break;
-	}
+	Shape shape;
+	shape.DrawXorLine(x1, y1, x2, y2);
 }
 
-/****************************************************************************
-*  Mouse Handler for Win 95                                                   *
-****************************************************************************/
-static LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
-{
-
-	PAINTSTRUCT ps;
-
-	char str[3] = " ";
-	switch (messg)
-	{
-
-	case WM_PAINT:
-		BeginPaint(hWnd, &ps);
-		PrintMessage(buffer);
-
-		ValidateRect(hWnd, NULL);
-
-		EndPaint(hWnd, &ps);
-		break;
-	case WM_CHAR:
-	{
-					// Win32 keyboard message: lParam=key code wParam= virtual key (ASCII) code 
-
-					if (!(LOWORD(wParam) & KF_UP) &&
-						!(LOWORD(wParam) & KF_ALTDOWN))
-
-					{
-						//  take keyboard input
-						key_input = (char)LOWORD(wParam);
-
-
-
-						if (key_input == ENTER) // Enter
-						{
-							EraseMessage();
-							//buffer[strlen(buffer)]=0x00;
-						}
-						else if (key_input == BACKSPACE) // BackSpace
-						{
-							if (strlen(buffer)>0)
-							{
-								int len = strlen(buffer) - 1;
-								// Clear last character in buffer
-								buffer[len] = ' ';
-								// Clear characters in input box
-								strcat_s(buffer, "   ");
-								PrintMessage(buffer);
-								buffer[len] = 0x00; // put end string
-							}
-						}
-						else if (key_input>31 && key_input<130)
-						{
-							int leng = strlen(buffer);
-							EraseMessage();
-							str[0] = key_input;
-							strcat_s(buffer, str); // add char
-							// display, update input box
-							PrintMessage(buffer);
-						}
-						else if (key_input != ESC) //ESC
-							key_input = -1;
-						break;
-					}
-	}
-	case WM_SIZE:
-		// resize 
-		SetMaxX(LOWORD(lParam));  // width of client area 
-		SetMaxY(HIWORD(lParam));
-		PostMessage(WinHandle, WM_PAINT, wParam, lParam);
-
-		break;
-	case WM_MOUSEMOVE:
-
-	{     key_input = wParam;
-	if (key_input == MK_LBUTTON)
-
-	{
-		EraseMessage();
-		mouse_x = LOWORD(lParam);
-		mouse_y = HIWORD(lParam);
-		key_input = wParam;
-		printf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
-		PrintMessage(buffer);
-		mouse_action = L_MOUSE_MOVE_DOWN;
-		ClearString(buffer);
-	}
-	break;
-	}
-	case WM_LBUTTONDOWN:
-
-	{
-
-						   EraseMessage();
-						   mouse_x = LOWORD(lParam);
-						   mouse_y = HIWORD(lParam);
-						   key_input = wParam;
-						   printf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
-						   PrintMessage(buffer);
-						   mouse_action = L_MOUSE_DOWN;
-						   ClearString(buffer);
-						   break;
-	}
-	case WM_LBUTTONUP:
-
-	{
-
-						 EraseMessage();
-						 mouse_x = LOWORD(lParam);
-						 mouse_y = HIWORD(lParam);
-						 key_input = wParam;
-						 sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
-						 PrintMessage(buffer);
-						 mouse_action = L_MOUSE_UP;
-						 ClearString(buffer);
-						 break;
-	}
-
-	case WM_RBUTTONDOWN:
-	{
-						   EraseMessage();
-						   key_input = wParam;
-						   mouse_x = LOWORD(lParam);
-						   mouse_y = HIWORD(lParam);
-
-						   sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
-						   PrintMessage(buffer);
-
-						   mouse_action = R_MOUSE_DOWN;
-						   ClearString(buffer);
-
-						   break;
-	}
-	case WM_LBUTTONDBLCLK:
-		EraseMessage();
-		mouse_x = LOWORD(lParam);
-		mouse_y = HIWORD(lParam);
-		key_input = wParam;
-		sprintf_s(buffer, " x = %d y = %d", mouse_x, mouse_y);
-		PrintMessage(buffer);
-		mouse_action = L_DOUBLE_CLICK;
-		ClearString(buffer);
-		key_input = wParam;
-
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return(DefWindowProc(hWnd, messg, wParam, lParam));
-		break;
-	}
-
-	return 0;
-
-}
+	/****************************************************************************
+	*  Returns the color value of the pixel at the specified point on the       *
+	*  screen.                                                                  *
+	****************************************************************************/
 
 
 void main()
 {
+	Window window;
+	//???
+	window.buffer[0] = 'i';
 	int p0_x, p0_y, p1_x, p1_y, cor, padrao, color = MY_MAGENTA;
 	char command[4];
-	InitGraphics();
+	window.InitGraphics();
 	while (key_input != ESC) {	// ESC exits the program
-		CheckGraphicsMsg();
-		if (key_input == ENTER)	 // Identify Enter
+		window.CheckGraphicsMsg();
+		/*if (key_input == ENTER)	 // Identify Enter
 		{
-			if (strlen(buffer) >= 3){
+			if (strlen(window.buffer) >= 3){
 
-				if (buffer[0] == 'c' && buffer[1] == 'o' && buffer[2] == 'l'){
+				if (window.buffer[0] == 'c' && window.buffer[1] == 'o' && window.buffer[2] == 'l'){
 					cor = atoi(&buffer[4]);
 					if (cor >= 0 && cor < 16)
 						color = cor;
-					ClearString(buffer);  // Erase buffer
+					window.ClearString(buffer);  // Erase buffer
 				}
 				else if (buffer[0] == 'p' && buffer[1] == 'a' && buffer[2] == 't'){
 					padrao = atoi(&buffer[4]);
@@ -669,7 +682,7 @@ void main()
 				}
 			}
 			key_input = -1;
-		}
+		}*/
 		if (mouse_action == L_MOUSE_DOWN) {  	// Pick first point 
 			p0_x = p1_x = mouse_x; p0_y = p1_y = mouse_y;
 			//	 mouse_action=NO_ACTION;
@@ -692,6 +705,6 @@ void main()
 			mouse_action = NO_ACTION;
 		}
 	}
-	CloseGraphics();
+	window.CloseGraphics();
 
 }
