@@ -139,4 +139,6 @@ public:
 
 	// Mouse Handler for Win 95
 	static LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam);
+
+	void X();
 };

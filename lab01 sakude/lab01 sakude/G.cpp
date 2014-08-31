@@ -31,7 +31,6 @@ static COLORREF color_trans_map[] =
 wchar_t wind_class[] = L"Window Application";
 wchar_t wind_name[] = L"Lab 01 CCI-36     ";
 
-
 // Set the X dimension of the current window in pixels.
 void G::SetMaxX(int maxX)
 {
@@ -71,10 +70,13 @@ void G::InitGraphics()
 
 	WinHandle = NULL; 
 	
-	hInst = NULL;
-
-	window_class = (LPCWSTR)wind_class;
-	window_name = (LPCWSTR)wind_name;
+	HINSTANCE hInst = NULL;
+	HWND hWnd;
+	WNDCLASS    wc;
+	LPCWSTR window_class = (LPCWSTR)wind_class;
+	//
+	LPCWSTR window_name = (LPCWSTR)wind_name;
+	// Fill up window structure 
 
 	wc.lpszClassName = window_class;  // registration name
 	wc.hInstance = hInst;				// application instance
@@ -430,6 +432,10 @@ LRESULT CALLBACK G::WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return 0;
+}
+
+void G::X(){
+	return;
 }
 
 SHORT G::numXpixels;

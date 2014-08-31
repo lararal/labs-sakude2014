@@ -5,11 +5,13 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
-#include "G.cpp"
+#include "G.h"
 
 void main()
 {
-	wchar_t x = wind_class[0];
+	G g;
+	g.X();
+
 	int p0_x, p0_y, p1_x, p1_y, cor, padrao, color = MY_MAGENTA;
 	char command[4];
 	InitGraphics();
