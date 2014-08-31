@@ -54,10 +54,85 @@ void G::DrawPixel(int x, int y)
 // Initializes the process for Window services
 // obtains anchor block handle
 // creates the main frame window which creates the main client window
-static void InitGraphics();
+void G::InitGraphics()
+{
+	shape = LINEDDA;
+	numXpixels = 500;
+	numYpixels = 500;
+	
+	key_input = NO_ACTION, mouse_action = NO_ACTION;
+	mouse_x, mouse_y;
+	graphics = TRUE; 
+		
+	pattern = { 1, 1, 1, 1, 1, 1, 1, 1 };
+
+	win_draw_color = RGB(255, 255, 255);
+	blackBrush;
+
+	WinHandle = NULL; 
+	
+	hInst = NULL;
+
+	window_class = (LPCWSTR)wind_class;
+	window_name = (LPCWSTR)wind_name;
+
+	wc.lpszClassName = window_class;  // registration name
+	wc.hInstance = hInst;				// application instance
+	wc.lpfnWndProc = (WNDPROC)WinProc; // event handling function
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW); // cursor type
+	wc.hIcon = NULL;
+	wc.lpszMenuName = NULL;						// menu, if any
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); // background color
+	wc.style = CS_HREDRAW | CS_VREDRAW;		// window style
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+
+	/* Registeer window class      */
+	//GlobalAddAtom(window_class);
+
+	if (!RegisterClass(&wc))
+	{
+		printf(" Error in RegisterClass...\n");
+		exit(1);
+	}
+
+	// Create window
+	hWnd = CreateWindow(
+		window_class,           // Desktop window class name             
+		window_name,       // window name                 
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // Window class style                  
+		0, 0,                //window  top, left corner(origin)
+		500, 500,                   // window X,Y size                                    
+		(HWND)NULL,                   // Parent window         /
+		(HMENU)NULL,				// handle to menu 
+		(HINSTANCE)hInst,			// handle to application instance 
+		(LPVOID)NULL);  //  pointer to window-creation data  
+
+	if ((hWnd == NULL))
+	{
+
+		printf("error in CreateWindow ...\n ");
+		exit(1);
+
+	}
+
+	// Sets the visibility state of window 
+	ShowWindow(hWnd, SW_SHOW);
+
+	// store window handle device context 
+	WinHandle = hWnd;
+	hdc = GetDC(WinHandle);
+	// set hpen, blackbrush for clearing window, color for text and text background
+	hpen = CreatePen(PS_SOLID, 1, win_draw_color);
+	SelectObject(hdc, hpen);
+	blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	SetBkColor(hdc, RGB(0, 0, 0));
+	SetTextColor(hdc, RGB(255, 255, 255));
+
+}
 
 // Reset display to default mode.
-static void CloseGraphics(void)
+void G::CloseGraphics(void)
 {
 	// Delete pen and destroy window
 	DeleteObject(hpen);
@@ -66,19 +141,19 @@ static void CloseGraphics(void)
 }
 
 // Returns the X dimension of the current window in pixels.
-static int GetMaxX(void)
+int G::GetMaxX(void)
 {
 	return numXpixels;
 }
 
 // Returns the Y dimension of the current window in pixels.
-static int GetMaxY(void)
+int G::GetMaxY(void)
 {
 	return numYpixels;
 }
 
 // Set current graphics drawing color.
-static void SetGraphicsColor(int new_color, int width)
+void G::SetGraphicsColor(int new_color, int width)
 {
 	HPEN hpenOld;
 	if (graphics)
@@ -98,7 +173,7 @@ static void SetGraphicsColor(int new_color, int width)
 	}
 }
 
-static void SetGraphicsPatern(int new_pattern){
+void G::SetGraphicsPatern(int new_pattern){
 	switch (new_pattern){
 	case FULL:
 		pattern = { 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -123,7 +198,7 @@ static void SetGraphicsPatern(int new_pattern){
 ////	return (int)GetPixel(hdc, x, y);
 ////}
 
-static void CheckGraphicsMsg(void)
+void G::CheckGraphicsMsg(void)
 {
 	MSG msg;
 	/*Peek Message from message queue */
@@ -135,7 +210,7 @@ static void CheckGraphicsMsg(void)
 	}
 }
 
-static void ClearString(char *str)
+void G::ClearString(char *str)
 {
 	str[0] = 0x00;
 }
@@ -157,7 +232,7 @@ static void ClearString(char *str)
 ////		TextOutA(hdc, START_TEXT_X, start_text_y, (LPCSTR)buffer, strlen(buffer));
 ////}
 
-static void DDA(int x1, int y1, int x2, int y2)
+void G::DDA(int x1, int y1, int x2, int y2)
 {   
 	// Atenção: x, y, dx, dy real  e i, length inteiro
 	int length;
@@ -178,7 +253,7 @@ static void DDA(int x1, int y1, int x2, int y2)
 	}
 }
 
-static void DrawXorPixel(int x, int y)
+void G::DrawXorPixel(int x, int y)
 {
 	unsigned int mask = win_draw_color;
 	COLORREF cor = GetPixel(hdc, x, y);
@@ -186,7 +261,7 @@ static void DrawXorPixel(int x, int y)
 	SetPixel(hdc, x, y, cor);
 }
 
-static void DrawXorLine(int x1, int y1, int x2, int y2)
+void G::DrawXorLine(int x1, int y1, int x2, int y2)
 {
 	int i, length;
 	float  x, y, dx, dy;
@@ -207,7 +282,7 @@ static void DrawXorLine(int x1, int y1, int x2, int y2)
 	}
 }
 
-static void Bresenham(int x1, int y1, int x2, int y2) {
+void G::Bresenham(int x1, int y1, int x2, int y2) {
 	int x, y, dx, dy, sx, sy, err, e2;
 	int i = 0;
 	dx = abs(x2 - x1);
@@ -231,7 +306,7 @@ static void Bresenham(int x1, int y1, int x2, int y2) {
 	DrawXorPixel(x1, y1);
 }
 
-static void PlotCircle(int xc, int yc, int x, int y)
+void G::PlotCircle(int xc, int yc, int x, int y)
 {
 	DrawXorPixel(xc + x, yc + y);
 	DrawXorPixel(xc + y, yc + x);
@@ -243,7 +318,7 @@ static void PlotCircle(int xc, int yc, int x, int y)
 	DrawXorPixel(xc - x, yc + y);
 }
 
-static void CircleBresenham(int xc, int yc, int r) {
+void G::CircleBresenham(int xc, int yc, int r) {
 	int x, y, d, deltaE, deltaSE;
 	int i = 0;
 	x = 0; y = r;
@@ -272,11 +347,11 @@ static void CircleBresenham(int xc, int yc, int r) {
 	PlotCircle(xc, yc, x, y);
 }
 
-static int distance(int x1, int y1, int x2, int y2){
+int G::distance(int x1, int y1, int x2, int y2){
 	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-static void Draw(int x1, int y1, int x2, int y2){
+void G::Draw(int x1, int y1, int x2, int y2){
 	switch (shape)
 	{
 		case LINEDDA:
@@ -294,7 +369,7 @@ static void Draw(int x1, int y1, int x2, int y2){
 }
 
 // Mouse Handler for Win 95
-static LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK G::WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 
