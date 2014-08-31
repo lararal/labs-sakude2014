@@ -9,12 +9,14 @@
 
 void main()
 {
-	G g;
-	g.X();
-
-	int p0_x, p0_y, p1_x, p1_y, cor, padrao, color = MY_MAGENTA;
+	int p0_x = 0;
+	int p0_y = 0;
+	int p1_x = 0;
+	int p1_y = 0;
+	int cor, padrao, color = MY_MAGENTA;
 	char command[4];
-	InitGraphics();
+	
+	G::InitGraphics();
 	while (true) {
 		G::CheckGraphicsMsg();
 		
@@ -26,7 +28,7 @@ void main()
 			if (p1_x != G::mouse_x || p1_y != G::mouse_y)  	// test if x or y changed
 			{	// Erase previous line. 
 
-				SetGraphicsColor((int)MY_LIGHTGREEN, 1);
+				G::SetGraphicsColor((int)MY_LIGHTGREEN, 1);
 				G::Draw(p0_x, p0_y, p1_x, p1_y);
 				p1_x = G::mouse_x; p1_y = G::mouse_y;
 				G::Draw(p0_x, p0_y, p1_x, p1_y);
@@ -35,12 +37,12 @@ void main()
 		if (G::mouse_action == L_MOUSE_UP)
 		{
 			G::Draw(p0_x, p0_y, p1_x, p1_y); //Erase the last xor line 
-			SetGraphicsColor((int)color, 2);
+			G::SetGraphicsColor((int)color, 2);
 			G::Draw(p0_x, p0_y, p1_x, p1_y); // Draw  final line
 			G::mouse_action = NO_ACTION;
 		}
 	}
-	CloseGraphics();
+	G::CloseGraphics();
 }
 
 

@@ -69,7 +69,8 @@ void G::InitGraphics()
 	blackBrush;
 
 	WinHandle = NULL; 
-	
+	mouse_action = NO_ACTION;
+
 	HINSTANCE hInst = NULL;
 	HWND hWnd;
 	WNDCLASS    wc;
