@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include <queue>
 
 
 #define PI 3.1415926535897932384626433832795
@@ -781,30 +782,61 @@ void FloodFillRec(int x, int y)
 
 		DrawPixel(x, y);
 
-		//if (Empty(x + 1, y))
+		if (Empty(x + 1, y))
 			FloodFillRec(x + 1, y);
-		//if (Empty(x - 1, y))
+		if (Empty(x - 1, y))
 			FloodFillRec(x - 1, y);
-		//if (Empty(x, y + 1))
+		if (Empty(x, y + 1))
 			FloodFillRec(x, y + 1);
-		//if (Empty(x, y - 1))
+		if (Empty(x, y - 1))
 			FloodFillRec(x, y - 1);
 			DrawPixel(x, y);
 
 	}
 }
 
-/*void FloodFill(){
-
-	queue<point_type> q;
-
-
-
-
-}*/
+void FloodFillIterative(polygon_type poly){
+	std::queue<point_type> q;
+	point_type seed; 
+	seed.x = 0, seed.y = 0;
+	for (int i = 0; i<poly.n; i++)
+	{
+		seed.x += poly.vertex[i].x;
+		seed.y += poly.vertex[i].y;
+	}
+	seed.x /= poly.n;
+	seed.y /= poly.n;
+	
+	q.push(seed);
+	point_type current, west, east, north, south;
+	while (!q.empty()){
+		current = q.front();
+		q.pop();
+		if (Empty(current.x, current.y)){
+			DrawPixel(current.x, current.y);
+			west.x = current.x - 1;
+			west.y = current.y;
+			east.x = current.x + 1;
+			east.y = current.y;
+			north.x = current.x;
+			north.y = current.y - 1;
+			south.x = current.x;
+			south.y = current.y + 1;
+			q.push(west);
+			q.push(east);
+			q.push(north);
+			q.push(south);
+		}
+	}
+}
 
 void FloodFillRecursive(polygon_type poly)
 {
+	
+	for (int i = 0; i < poly.n; i++){
+		DrawPixel(poly.vertex[i].x, poly.vertex[i].y);
+	}
+
 	int x_seed = 0, y_seed = 0;
 	for (int i = 0; i<poly.n; i++)
 	{
@@ -813,6 +845,10 @@ void FloodFillRecursive(polygon_type poly)
 	}
 	x_seed /= poly.n;
 	y_seed /= poly.n;
+
+	point_type seed;
+	seed.x = x_seed;
+	seed.y = y_seed;
 	FloodFillRec(x_seed, y_seed);
 }
 
@@ -890,7 +926,8 @@ void main()
 		else  if (mouse_action == L_MOUSE_UP)
 		{
 			SetGraphicsColor((int)MY_RED, numXpixels);
-			DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+			//DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+			DDA(p0_x, p0_y, p1_x, p1_y);
 			p0_x = p1_x = mouse_x;
 			p0_y = p1_y = mouse_y;
 
@@ -903,10 +940,12 @@ void main()
 		}
 		else  if (mouse_action == R_MOUSE_DOWN)
 		{
+			polygon_type poly = polygon;
+			DDA(poly.vertex[0].x, poly.vertex[0].y, poly.vertex[poly.n - 1].x, poly.vertex[poly.n - 1].y);
 			edge_list_type list;
 			int num_Edges;
 			//FillPolygon(polygon, list);
-			FloodFillRecursive(polygon);
+			FloodFillIterative(polygon);
 			mouse_action = NO_ACTION;
 			polygon.n = 0;
 		}
