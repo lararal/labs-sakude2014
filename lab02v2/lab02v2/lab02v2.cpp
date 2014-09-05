@@ -857,47 +857,13 @@ void FloodFillRecursive(polygon_type poly)
 void main()
 {
 	int p0_x, p0_y, p1_x, p1_y, cor, padrao, color = MY_MAGENTA;
-	//int x_1, y_1, x_2, y_2;
-	char command[4];
 	polygon_type polygon;
 	polygon.n = 0;
 	InitGraphics();
 	while (key_input != ESC) {	// ESC exits the program
 		CheckGraphicsMsg();
-		/*if (key_input == ENTER)	 // Identify Enter
-		{
-			if (strlen(buffer) >= 3){
 
-				if (buffer[0] == 'c' && buffer[1] == 'o' && buffer[2] == 'l'){
-					cor = atoi(&buffer[4]);
-					if (cor >= 0 && cor < 16)
-						color = cor;
-					ClearString(buffer);  // Erase buffer
-				}
-				else if (buffer[0] == 'p' && buffer[1] == 'a' && buffer[2] == 't'){
-					padrao = atoi(&buffer[4]);
-					if (padrao >= 0 && padrao < 4)
-						SetGraphicsPatern(padrao);
-					ClearString(buffer);  // Erase buffer
-				}
-				else if (buffer[0] == 'd' && buffer[1] == 'd' && buffer[2] == 'a'){
-					shape = LINEDDA;
-					ClearString(buffer);  // Erase buffer
-				}
-				else if (buffer[0] == 'b' && buffer[1] == 'r' && buffer[2] == 'e'){
-					shape = BRESENHAM;
-					ClearString(buffer);  // Erase buffer
-				}
-				else if (buffer[0] == 'c' && buffer[1] == 'i' && buffer[2] == 'r'){
-					shape = CIRCLE;
-					ClearString(buffer);  // Erase buffer
-				}
-				else {
-					ClearString(buffer);  // Erase buffer
-				}
-			}
-			key_input = -1;
-		}*/
+		SetGraphicsColor((int)MY_RED, numXpixels);
 		if (mouse_action == L_MOUSE_DOWN)
 		{  // Pick first point up 
 			if (polygon.n == 0)
@@ -912,10 +878,10 @@ void main()
 			if (p1_x != mouse_x || p1_y != mouse_y)
 			{  // Erase previous line. NOTE: using XOR line
 
-				//DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 				p1_x = mouse_x;
 				p1_y = mouse_y;  // Draw new line
-				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+				//DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 				/*x_1 = p0_x;
 				y_1 = p0_y;
@@ -925,8 +891,8 @@ void main()
 		}
 		else  if (mouse_action == L_MOUSE_UP)
 		{
-			SetGraphicsColor((int)MY_RED, numXpixels);
-			//DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+			DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+			//SetGraphicsColor((int)MY_RED, numXpixels);
 			DDA(p0_x, p0_y, p1_x, p1_y);
 			p0_x = p1_x = mouse_x;
 			p0_y = p1_y = mouse_y;
@@ -940,10 +906,9 @@ void main()
 		}
 		else  if (mouse_action == R_MOUSE_DOWN)
 		{
-			polygon_type poly = polygon;
-			DDA(poly.vertex[0].x, poly.vertex[0].y, poly.vertex[poly.n - 1].x, poly.vertex[poly.n - 1].y);
 			edge_list_type list;
-			int num_Edges;
+			int num_Edges; // for ScanLine (FillPolygon)
+			DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
 			//FillPolygon(polygon, list);
 			FloodFillIterative(polygon);
 			mouse_action = NO_ACTION;
