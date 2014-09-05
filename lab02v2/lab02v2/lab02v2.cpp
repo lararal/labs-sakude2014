@@ -53,12 +53,15 @@ HWND WinHandle = NULL;                /* Client area window handle */
 static  HPEN hpen;
 // 16 Predefined colors
 
+int menu_item;
+
+
 typedef enum {
 	FULL, DOTTED, DASHED, DOTTED_DASHED
 } my_pattern;
 
 typedef enum {
-	LINEDDA, BRESENHAM, CIRCLE
+	POLY_SCAN, POLY_FLOOD, CIRCLE
 } my_shape;
 
 typedef enum {
@@ -87,8 +90,6 @@ static COLORREF color_trans_map[] =
 	RGB(255, 255, 255),//MY_WHITE,
 };
 
-my_shape shape = LINEDDA;
-
 /****************************************************************************
 *  Set the X dimension of the current window in pixels.                 *
 ****************************************************************************/
@@ -113,6 +114,51 @@ void SetMaxY(int maxY)
 void DrawPixel(int x, int y)
 {
 	SetPixel(hdc, x, y, win_draw_color);
+}
+
+HMENU menu, menu_draw, menu_color;
+
+void MenuBar()
+{
+	menu = CreateMenu();
+	menu_draw = CreatePopupMenu();
+	menu_color = CreatePopupMenu();
+
+	AppendMenu(
+		menu,      // handle to menu to be changed
+		MF_POPUP,      // menu-item flags
+		(UINT)menu_draw,  // menu-item identifier or handle to drop-down menu or submenu
+		(LPCTSTR)L"&Draw" // menu-item content
+		);
+
+
+	InsertMenu(menu_draw, 0, MF_STRING, 21, (LPCTSTR)L"&Polygon - ScanLine");
+
+	AppendMenu(menu_draw, MF_STRING, 22, (LPCTSTR)L"&Polygon - FloodFill");
+
+	AppendMenu(menu_draw, MF_STRING, 23, (LPCTSTR)L"&Circle");
+
+
+	AppendMenu(menu, MF_POPUP, (UINT)menu_color, (LPCTSTR)L"&Color");
+
+	InsertMenu(menu_color, 0, MF_STRING, 1, (LPCTSTR)L"Black");
+	AppendMenu(menu_color, MF_STRING, 2, (LPCTSTR)L"Blue");
+	AppendMenu(menu_color, MF_STRING, 3, (LPCTSTR)L"Green");
+	AppendMenu(menu_color, MF_STRING, 4, (LPCTSTR)L"Cyan");
+	AppendMenu(menu_color, MF_STRING, 5, (LPCTSTR)L"Red");
+
+	AppendMenu(menu_color, MF_STRING, 6, (LPCTSTR)L"Magenta");
+	AppendMenu(menu_color, MF_STRING, 7, (LPCTSTR)L"Brown");
+	AppendMenu(menu_color, MF_STRING, 8, (LPCTSTR)L"LightGray");
+	AppendMenu(menu_color, MF_STRING, 9, (LPCTSTR)L"DarkGray");
+
+	AppendMenu(menu_color, MF_STRING, 10, (LPCTSTR)L"LightBlue");
+	AppendMenu(menu_color, MF_STRING, 11, (LPCTSTR)L"LightGreen");
+	AppendMenu(menu_color, MF_STRING, 12, (LPCTSTR)L"LightCyan");
+	AppendMenu(menu_color, MF_STRING, 13, (LPCTSTR)L"LightRed");
+	AppendMenu(menu_color, MF_STRING, 14, (LPCTSTR)L"LightMagenta");
+	AppendMenu(menu_color, MF_STRING, 15, (LPCTSTR)L"Yellow");
+	AppendMenu(menu_color, MF_STRING, 16, (LPCTSTR)L"White");
 }
 
 /****************************************************************************
@@ -151,6 +197,8 @@ void InitGraphics()
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 
+	MenuBar();
+
 	/* Registeer window class      */
 	//GlobalAddAtom(window_class);
 
@@ -163,12 +211,12 @@ void InitGraphics()
 	// Create window
 	hWnd = CreateWindow(
 		window_class,           // Desktop window class name             
-		window_name,       // window name                 
+		L"Lab 2 CCI-36",       // window name                 
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // Window class style                  
 		0, 0,                //window  top, left corner(origin)
 		500, 500,                   // window X,Y size                                    
 		(HWND)NULL,                   // Parent window         /
-		(HMENU)NULL,				// handle to menu 
+		(HMENU)menu,				// handle to menu 
 		(HINSTANCE)hInst,			// handle to application instance 
 		(LPVOID)NULL);  //  pointer to window-creation data  
 
@@ -419,24 +467,6 @@ int distance(int x1, int y1, int x2, int y2){
 	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-void Draw(int x1, int y1, int x2, int y2){
-
-	switch (shape)
-	{
-	case LINEDDA:
-		DrawXorLine(x1, y1, x2, y2);
-		break;
-	case BRESENHAM:
-		Bresenham(x1, y1, x2, y2);
-		break;
-	case CIRCLE:
-		CircleBresenham(x1, y1, distance(x1, y1, x2, y2));
-		break;
-	default:
-		break;
-	}
-}
-
 /****************************************************************************
 *  Mouse Handler for Win 95                                                   *
 ****************************************************************************/
@@ -448,7 +478,10 @@ static LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPa
 	char str[3] = " ";
 	switch (messg)
 	{
+	case WM_COMMAND:
+		menu_item = LOWORD(wParam);
 
+		break;
 	case WM_PAINT:
 		BeginPaint(hWnd, &ps);
 		PrintMessage(buffer);
@@ -856,65 +889,156 @@ void FloodFillRecursive(polygon_type poly)
 
 void main()
 {
-	int p0_x, p0_y, p1_x, p1_y, cor, padrao, color = MY_MAGENTA;
+	int p0_x, p0_y, p1_x, p1_y, menu_it = 0, color = MY_WHITE;
+	InitGraphics();
+
 	polygon_type polygon;
 	polygon.n = 0;
-	InitGraphics();
+	my_shape shape = POLY_SCAN;
+
+	menu_item = 0;
+	CheckMenuItem(menu_color, 1, MF_CHECKED);
+	CheckMenuItem(menu_draw, 21, MF_CHECKED);
+
 	while (key_input != ESC) {	// ESC exits the program
 		CheckGraphicsMsg();
-
-		SetGraphicsColor((int)MY_RED, numXpixels);
-		if (mouse_action == L_MOUSE_DOWN)
-		{  // Pick first point up 
-			if (polygon.n == 0)
+		if (menu_it != menu_item)
+			switch (menu_item){
+			case 21:{
+				CheckMenuItem(menu_draw, 21, MF_CHECKED);
+				CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
+				menu_it = menu_item;
+				shape = POLY_SCAN;
+				polygon.n = 0;
+				break;
+			}
+			case 22:
 			{
-				p0_x = p1_x = mouse_x;
-				p0_y = p1_y = mouse_y;
-				InsertVertex(polygon, p0_x, p0_y);
+				CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(menu_draw, 22, MF_CHECKED);
+				CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
+				menu_it = menu_item;
+				shape = POLY_FLOOD;
+				polygon.n = 0;
+				break;
+			}
+			case 23:
+			{
+				CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(menu_draw, 23, MF_CHECKED);
+
+				menu_it = menu_item;
+				shape = CIRCLE;
+				break;
+			}
+			default:
+			{ 
+				int i;
+				for (i = 1; i <= 16; i++)
+					CheckMenuItem(menu_color, i, MF_UNCHECKED);
+					CheckMenuItem(menu_color, menu_item, MF_CHECKED);
+				if (menu_item >= 1 && menu_item <= 16)
+					color = menu_item - 1;
+
+				menu_it = menu_item;
+
 			}
 		}
-		if (mouse_action == L_MOUSE_MOVE_DOWN)
-		{  // Example of elastic line
-			if (p1_x != mouse_x || p1_y != mouse_y)
-			{  // Erase previous line. NOTE: using XOR line
+		SetGraphicsColor(color, numXpixels);
 
-				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
-				p1_x = mouse_x;
-				p1_y = mouse_y;  // Draw new line
-				//DrawXorLine(p0_x, p0_y, p1_x, p1_y);
-				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
-				/*x_1 = p0_x;
-				y_1 = p0_y;
-				x_2 = p1_x;
-				y_2 = p1_y;*/
+		if (mouse_action == L_MOUSE_DOWN)
+		{  
+			switch (shape) 
+			{
+			case POLY_FLOOD:
+			case POLY_SCAN:
+				// Pick first point up 
+				if (polygon.n == 0)
+				{
+					p0_x = p1_x = mouse_x;
+					p0_y = p1_y = mouse_y;
+					InsertVertex(polygon, p0_x, p0_y);
+				}
+				break;
+			case CIRCLE:
+				p0_x = p1_x = mouse_x;
+				p0_y = p1_y = mouse_y;
+				break;
+			}			
+		}
+		if (mouse_action == L_MOUSE_MOVE_DOWN)
+		{  
+			if (p1_x != mouse_x || p1_y != mouse_y)
+			{  
+				switch (shape)
+				{
+				case POLY_FLOOD:
+				case POLY_SCAN:
+					  // Draw new line
+					DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+					p1_x = mouse_x;
+					p1_y = mouse_y;
+					DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+					break;
+				case CIRCLE:
+					CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+					p1_x = mouse_x;
+					p1_y = mouse_y;
+					CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+					break;
+				}
 			}
 		}
 		else  if (mouse_action == L_MOUSE_UP)
 		{
-			DrawXorLine(p0_x, p0_y, p1_x, p1_y);
-			//SetGraphicsColor((int)MY_RED, numXpixels);
-			DDA(p0_x, p0_y, p1_x, p1_y);
-			p0_x = p1_x = mouse_x;
-			p0_y = p1_y = mouse_y;
+			switch (shape)
+			{
+			case POLY_FLOOD:
+			case POLY_SCAN:
+				DrawXorLine(p0_x, p0_y, p1_x, p1_y);
+				DDA(p0_x, p0_y, p1_x, p1_y);
+				p0_x = p1_x = mouse_x;
+				p0_y = p1_y = mouse_y;
 
-			if (polygon.n > 0 &&
-				(polygon.vertex[polygon.n - 1].x != p0_x
-				|| polygon.vertex[polygon.n - 1].y != p0_y))
-				InsertVertex(polygon, p0_x, p0_y);
-
+				if (polygon.n > 0 &&
+					(polygon.vertex[polygon.n - 1].x != p0_x
+					|| polygon.vertex[polygon.n - 1].y != p0_y))
+					InsertVertex(polygon, p0_x, p0_y);
+				break;
+			case CIRCLE:
+				CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+				p1_x = mouse_x;
+				p1_y = mouse_y;
+				CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+				break;
+			}
 			mouse_action = NO_ACTION;
 		}
-		else  if (mouse_action == R_MOUSE_DOWN)
+		else if (mouse_action == R_MOUSE_DOWN)
 		{
-			edge_list_type list;
-			int num_Edges; // for ScanLine (FillPolygon)
-			DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
-			//FillPolygon(polygon, list);
-			FloodFillIterative(polygon);
-			mouse_action = NO_ACTION;
-			polygon.n = 0;
+			switch (shape)
+			{
+			case POLY_FLOOD:
+			case POLY_SCAN:
+
+				edge_list_type list;
+				int num_Edges;
+				DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
+				for (int i = 0; i < polygon.n; i++) {
+					DrawPixel(polygon.vertex[i].x, polygon.vertex[i].y);
+				}
+				if (shape == POLY_SCAN) FillPolygon(polygon, list);
+				else if (shape == POLY_FLOOD) FloodFillIterative(polygon);
+				mouse_action = NO_ACTION;
+				polygon.n = 0;
+				break;
+			case CIRCLE:
+				// Fill Circle
+				break;
+			}
 		}
 	}
 	CloseGraphics();
 }
-
