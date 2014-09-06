@@ -423,7 +423,7 @@ void Bresenham(int x1, int y1, int x2, int y2) {
 	}
 	DrawXorPixel(x1, y1);
 }
-void PlotCircle(int xc, int yc, int x, int y)
+void PlotXorCircle(int xc, int yc, int x, int y)
 {
 	DrawXorPixel(xc + x, yc + y);
 	DrawXorPixel(xc + y, yc + x);
@@ -433,6 +433,45 @@ void PlotCircle(int xc, int yc, int x, int y)
 	DrawXorPixel(xc - y, yc - x);
 	DrawXorPixel(xc - y, yc + x);
 	DrawXorPixel(xc - x, yc + y);
+}
+void PlotCircle(int xc, int yc, int x, int y)
+{
+	DrawPixel(xc + x, yc + y);
+	DrawPixel(xc + y, yc + x);
+	DrawPixel(xc + y, yc - x);
+	DrawPixel(xc + x, yc - y);
+	DrawPixel(xc - x, yc - y);
+	DrawPixel(xc - y, yc - x);
+	DrawPixel(xc - y, yc + x);
+	DrawPixel(xc - x, yc + y);
+}
+void CircleXorBresenham(int xc, int yc, int r) {
+	int x, y, d, deltaE, deltaSE;
+	int i = 0;
+	x = 0; y = r;
+	d = 1 - r; deltaE = 3; deltaSE = -2 * r + 5;
+
+	PlotXorCircle(xc, yc, x, y); // Plot 8 symetrical circle points
+
+	while (y > x)   // Draw a quarter of circle in clockwise
+	{
+		if (d < 0)
+		{
+			d += deltaE;
+			deltaE += 2;
+			deltaSE += 2;
+		}
+		else {
+			d += deltaSE;
+			deltaE += 2;
+			deltaSE += 4;
+			y--;
+		}
+		x++;
+		if (pattern[i%pattern.size()])  PlotXorCircle(xc, yc, x, y); // Plot 8 symetrical circle points
+		i++;
+	}
+	PlotXorCircle(xc, yc, x, y);
 }
 void CircleBresenham(int xc, int yc, int r) {
 	int x, y, d, deltaE, deltaSE;
@@ -806,8 +845,14 @@ void FillPolygon(polygon_type &polygon, edge_list_type &list)
 bool Empty(int x, int y)
 {
 	return(GetPixel(x, y) == 0);
-
 }
+
+bool Empty(int x, int y, int color)
+{
+	int colorPixel = GetPixel(x, y);
+	return(colorPixel != color_trans_map[color]);
+}
+
 void FloodFillRec(int x, int y)
 {
 	if (Empty(x, y))
@@ -828,7 +873,7 @@ void FloodFillRec(int x, int y)
 	}
 }
 
-void FloodFillIterative(polygon_type poly){
+void FloodFillIterative(polygon_type poly, int color){
 	std::queue<point_type> q;
 	point_type seed; 
 	seed.x = 0, seed.y = 0;
@@ -845,7 +890,36 @@ void FloodFillIterative(polygon_type poly){
 	while (!q.empty()){
 		current = q.front();
 		q.pop();
-		if (Empty(current.x, current.y)){
+		if (Empty(current.x, current.y, color)){
+			DrawPixel(current.x, current.y);
+			west.x = current.x - 1;
+			west.y = current.y;
+			east.x = current.x + 1;
+			east.y = current.y;
+			north.x = current.x;
+			north.y = current.y - 1;
+			south.x = current.x;
+			south.y = current.y + 1;
+			q.push(west);
+			q.push(east);
+			q.push(north);
+			q.push(south);
+		}
+	}
+}
+
+void FillCircle(int r_x, int r_y, int color){
+	std::queue<point_type> q;
+	point_type seed;
+	seed.x = r_x;
+	seed.y = r_y;
+
+	q.push(seed);
+	point_type current, west, east, north, south;
+	while (!q.empty()){
+		current = q.front();
+		q.pop();
+		if (Empty(current.x, current.y, color)){
 			DrawPixel(current.x, current.y);
 			west.x = current.x - 1;
 			west.y = current.y;
@@ -983,10 +1057,10 @@ void main()
 					DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 					break;
 				case CIRCLE:
-					CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+					CircleXorBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
 					p1_x = mouse_x;
 					p1_y = mouse_y;
-					CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+					CircleXorBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
 					break;
 				}
 			}
@@ -1008,7 +1082,7 @@ void main()
 					InsertVertex(polygon, p0_x, p0_y);
 				break;
 			case CIRCLE:
-				CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
+				CircleXorBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
 				p1_x = mouse_x;
 				p1_y = mouse_y;
 				CircleBresenham(p0_x, p0_y, distance(p0_x, p0_y, p1_x, p1_y));
@@ -1022,7 +1096,6 @@ void main()
 			{
 			case POLY_FLOOD:
 			case POLY_SCAN:
-
 				edge_list_type list;
 				int num_Edges;
 				DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
@@ -1030,14 +1103,14 @@ void main()
 					DrawPixel(polygon.vertex[i].x, polygon.vertex[i].y);
 				}
 				if (shape == POLY_SCAN) FillPolygon(polygon, list);
-				else if (shape == POLY_FLOOD) FloodFillIterative(polygon);
-				mouse_action = NO_ACTION;
+				else if (shape == POLY_FLOOD) FloodFillIterative(polygon, color);
 				polygon.n = 0;
 				break;
 			case CIRCLE:
-				// Fill Circle
+				FillCircle(p0_x, p0_y, color);
 				break;
 			}
+			mouse_action = NO_ACTION;
 		}
 	}
 	CloseGraphics();
