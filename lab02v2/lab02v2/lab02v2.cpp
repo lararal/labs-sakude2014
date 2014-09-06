@@ -42,7 +42,18 @@ static BOOL graphics = TRUE;                /* Boolean, enable graphics?  */
 
 //static short draw_color = MY_WHITE;        /* Current drawing color.     */
 char buffer[200] = "";					// string buffer for keyboard input
-std::vector<bool> pattern = { 1, 1, 1, 1, 1, 1, 1, 1 };
+
+std::vector<std::vector<int>> pattern = {
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	{ 1, 1, 1, 1, 1, 1, 1, 1 },
+};
+
 
 static COLORREF win_draw_color = RGB(255, 255, 255);  // current draw color
 static HBRUSH blackBrush;
@@ -90,6 +101,144 @@ static COLORREF color_trans_map[] =
 	RGB(255, 255, 255),//MY_WHITE,
 };
 
+
+void UpdatePattern(int p){
+
+	std::vector<std::vector<int>> pattern0 = {
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	};
+	std::vector<std::vector<int>> pattern1 = {
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0 }
+	};
+	std::vector<std::vector<int>> pattern2 = {
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 }
+	};
+	std::vector<std::vector<int>> pattern3 = {
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+	};
+	std::vector<std::vector<int>> pattern4 = {
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+	};
+	std::vector<std::vector<int>> pattern5 = {
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+	};
+	std::vector<std::vector<int>> pattern6 = {
+		{ 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 0, 0, 1, 1, 1, 0, 0, 0 },
+		{ 0, 1, 1, 1, 1, 1, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 0 },
+		{ 0, 1, 1, 1, 1, 1, 0, 0 },
+		{ 0, 0, 1, 1, 1, 0, 0, 0 },
+		{ 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+	};
+	std::vector<std::vector<int>> pattern7 = {
+		{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 0 },
+		{ 1, 0, 0, 0, 0, 0, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 0, 0, 0, 0, 1, 0 },
+		{ 1, 0, 1, 1, 1, 0, 1, 0 },
+		{ 1, 0, 0, 0, 0, 0, 1, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 0 },
+	};
+	std::vector<std::vector<int>> pattern8 = {
+		{ 0, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 0, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 0, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 0, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 0, 1, 0 },
+	};
+	std::vector<std::vector<int>> pattern9 = {
+		{ 0, 0, 1, 1, 0, 0, 1, 1 },
+		{ 0, 0, 1, 1, 0, 0, 1, 1 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 0, 0, 1, 1, 0, 0, 1, 1 },
+		{ 0, 0, 1, 1, 0, 0, 1, 1 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+		{ 1, 1, 0, 0, 1, 1, 0, 0 },
+	};
+
+	switch (p){
+		case 30:
+			pattern = pattern0;
+			break;
+		case 31:
+			pattern = pattern1;
+			break;
+		case 32:
+			pattern = pattern2;
+			break;
+		case 33:
+			pattern = pattern3;
+			break;
+		case 34:
+			pattern = pattern4;
+			break;
+		case 35:
+			pattern = pattern5;
+			break;
+		case 36:
+			pattern = pattern6;
+			break;
+		case 37:
+			pattern = pattern7;
+			break;
+		case 38:
+			pattern = pattern8;
+			break;
+		case 39:
+			pattern = pattern9;
+			break;
+	}
+}
+
 /****************************************************************************
 *  Set the X dimension of the current window in pixels.                 *
 ****************************************************************************/
@@ -116,13 +265,14 @@ void DrawPixel(int x, int y)
 	SetPixel(hdc, x, y, win_draw_color);
 }
 
-HMENU menu, menu_draw, menu_color;
+HMENU menu, menu_draw, menu_color, menu_pattern;
 
 void MenuBar()
 {
 	menu = CreateMenu();
 	menu_draw = CreatePopupMenu();
 	menu_color = CreatePopupMenu();
+	menu_pattern = CreatePopupMenu();
 
 	AppendMenu(
 		menu,      // handle to menu to be changed
@@ -159,6 +309,18 @@ void MenuBar()
 	AppendMenu(menu_color, MF_STRING, 14, (LPCTSTR)L"LightMagenta");
 	AppendMenu(menu_color, MF_STRING, 15, (LPCTSTR)L"Yellow");
 	AppendMenu(menu_color, MF_STRING, 16, (LPCTSTR)L"White");
+
+	AppendMenu(menu, MF_POPUP, (UINT)menu_pattern, (LPCTSTR)L"&Pattern");
+	InsertMenu(menu_pattern, 0, MF_STRING, 30, (LPCTSTR)L"Pattern 0");
+	AppendMenu(menu_pattern, MF_STRING, 31, (LPCTSTR)L"Pattern 1");
+	AppendMenu(menu_pattern, MF_STRING, 32, (LPCTSTR)L"Pattern 2");
+	AppendMenu(menu_pattern, MF_STRING, 33, (LPCTSTR)L"Pattern 3");
+	AppendMenu(menu_pattern, MF_STRING, 34, (LPCTSTR)L"Pattern 4");
+	AppendMenu(menu_pattern, MF_STRING, 35, (LPCTSTR)L"Pattern 5");
+	AppendMenu(menu_pattern, MF_STRING, 36, (LPCTSTR)L"Pattern 6");
+	AppendMenu(menu_pattern, MF_STRING, 37, (LPCTSTR)L"Pattern 7");
+	AppendMenu(menu_pattern, MF_STRING, 38, (LPCTSTR)L"Pattern 8");
+	AppendMenu(menu_pattern, MF_STRING, 39, (LPCTSTR)L"Pattern 9");
 }
 
 /****************************************************************************
@@ -293,24 +455,6 @@ void SetGraphicsColor(int new_color, int width)
 		}
 	}
 }
-void SetGraphicsPatern(int new_pattern){
-	switch (new_pattern){
-	case FULL:
-		pattern = { 1, 1, 1, 1, 1, 1, 1, 1 };
-		break;
-	case DOTTED:
-		pattern = { 1, 0, 0 };
-		break;
-	case DASHED:
-		pattern = { 1, 1, 1, 0, 0, 0 };
-		break;
-	case DOTTED_DASHED:
-		pattern = { 1, 1, 1, 0, 0, 0, 1, 0, 0, 0 };
-		break;
-	default:
-		break;
-	}
-}
 
 /****************************************************************************
 *  Returns the color value of the pixel at the specified point on the       *
@@ -367,7 +511,7 @@ void DDA(int x1, int y1, int x2, int y2)
 		for (int i = 0; i <= length; i++)
 		{
 			//int size = pattern.size();
-			if (pattern[i%pattern.size()]) DrawPixel(Arred((int)x), Arred((int)y));
+			DrawPixel(Arred((int)x), Arred((int)y));
 			x = x + dx;    // dx = 1.0 ou -1.0 ou 1/m
 			y = y + dy;   // yx = 1.0 ou -1.0 ou m
 		}
@@ -394,7 +538,7 @@ void DrawXorLine(int x1, int y1, int x2, int y2)
 		x = (float)x1; y = (float)y1;
 		for (i = 0; i <= length; i++)
 		{
-			if (pattern[i%pattern.size()]) DrawXorPixel(Arred(x), Arred(y));
+			DrawXorPixel(Arred(x), Arred(y));
 			x = x + dx;    // dx = 1 ou -1 ou m
 			y = y + dy;   // yx = 1 ou -1 ou 1/m
 		}
@@ -409,7 +553,7 @@ void Bresenham(int x1, int y1, int x2, int y2) {
 	if (x1 < x2) sx = 1; else sx = -1;
 	if (y1 < y2) sy = 1; else sy = -1;
 	while (x1 != x2 && y1 != y2) {
-		if (pattern[i%pattern.size()]) DrawXorPixel(x1, y1);
+		DrawXorPixel(x1, y1);
 		e2 = 2 * err;
 		if (e2 > -dy) {
 			err = err - dy;
@@ -468,7 +612,7 @@ void CircleXorBresenham(int xc, int yc, int r) {
 			y--;
 		}
 		x++;
-		if (pattern[i%pattern.size()])  PlotXorCircle(xc, yc, x, y); // Plot 8 symetrical circle points
+		PlotXorCircle(xc, yc, x, y); // Plot 8 symetrical circle points
 		i++;
 	}
 	PlotXorCircle(xc, yc, x, y);
@@ -496,7 +640,7 @@ void CircleBresenham(int xc, int yc, int r) {
 			y--;
 		}
 		x++;
-		if (pattern[i%pattern.size()])  PlotCircle(xc, yc, x, y); // Plot 8 symetrical circle points
+		PlotCircle(xc, yc, x, y); // Plot 8 symetrical circle points
 		i++;
 	}
 	PlotCircle(xc, yc, x, y);
@@ -753,12 +897,11 @@ void FillIn(int x1, int x2, int y)
 		{
 			px = x % 8;
 
-			DrawPixel(x, y);
+			if (pattern[y%8][x%8]) DrawPixel(x, y);
 
 		}
 	}
 }
-
 
 void UpdateXValues(edge_list_type &list, int last_Edge, int &start_Edge, int scan)
 {
@@ -960,7 +1103,6 @@ void FloodFillRecursive(polygon_type poly)
 }
 
 
-
 void main()
 {
 	int p0_x, p0_y, p1_x, p1_y, menu_it = 0, color = MY_WHITE;
@@ -973,7 +1115,7 @@ void main()
 	menu_item = 0;
 	CheckMenuItem(menu_color, 1, MF_CHECKED);
 	CheckMenuItem(menu_draw, 21, MF_CHECKED);
-
+	CheckMenuItem(menu_draw, 30, MF_CHECKED);
 	while (key_input != ESC) {	// ESC exits the program
 		CheckGraphicsMsg();
 		if (menu_it != menu_item)
@@ -1007,10 +1149,26 @@ void main()
 				shape = CIRCLE;
 				break;
 			}
+			case 30:
+			case 31:
+			case 32:
+			case 33:
+			case 34:
+			case 35:
+			case 36:
+			case 37:
+			case 38:
+			case 39:
+				for (int i = 30; i <= 39; i++){
+					CheckMenuItem(menu_pattern, i, MF_UNCHECKED);
+					CheckMenuItem(menu_pattern, menu_item, MF_CHECKED);
+				}
+				UpdatePattern(menu_item);
+				menu_it = menu_item;
+				break;
 			default:
 			{ 
-				int i;
-				for (i = 1; i <= 16; i++)
+				for (int i = 1; i <= 16; i++)
 					CheckMenuItem(menu_color, i, MF_UNCHECKED);
 					CheckMenuItem(menu_color, menu_item, MF_CHECKED);
 				if (menu_item >= 1 && menu_item <= 16)
