@@ -202,36 +202,36 @@ void UpdatePattern(int p){
 	};
 
 	switch (p){
-		case 30:
-			pattern = pattern0;
-			break;
-		case 31:
-			pattern = pattern1;
-			break;
-		case 32:
-			pattern = pattern2;
-			break;
-		case 33:
-			pattern = pattern3;
-			break;
-		case 34:
-			pattern = pattern4;
-			break;
-		case 35:
-			pattern = pattern5;
-			break;
-		case 36:
-			pattern = pattern6;
-			break;
-		case 37:
-			pattern = pattern7;
-			break;
-		case 38:
-			pattern = pattern8;
-			break;
-		case 39:
-			pattern = pattern9;
-			break;
+	case 30:
+		pattern = pattern0;
+		break;
+	case 31:
+		pattern = pattern1;
+		break;
+	case 32:
+		pattern = pattern2;
+		break;
+	case 33:
+		pattern = pattern3;
+		break;
+	case 34:
+		pattern = pattern4;
+		break;
+	case 35:
+		pattern = pattern5;
+		break;
+	case 36:
+		pattern = pattern6;
+		break;
+	case 37:
+		pattern = pattern7;
+		break;
+	case 38:
+		pattern = pattern8;
+		break;
+	case 39:
+		pattern = pattern9;
+		break;
 	}
 }
 
@@ -860,7 +860,7 @@ void LoadPolygon(polygon_type &polygon, edge_list_type &list, int &num_Edges)
 
 	for (; k < polygon.n; k++)
 	{
-		GetPoint(polygon, (k+1)%polygon.n, x2, y2);
+		GetPoint(polygon, (k + 1) % polygon.n, x2, y2);
 		if (y1 == y2) x1 = x2;
 		else
 		{
@@ -892,7 +892,7 @@ void FillIn(int x1, int x2, int y)
 		{
 			px = x % 8;
 
-			if (pattern[y%8][x%8]) DrawPixel(x, y);
+			if (pattern[y % 8][x % 8]) DrawPixel(x, y);
 
 		}
 	}
@@ -1005,14 +1005,14 @@ void FloodFillRec(int x, int y)
 			FloodFillRec(x, y + 1);
 		if (Empty(x, y - 1))
 			FloodFillRec(x, y - 1);
-			DrawPixel(x, y);
+		DrawPixel(x, y);
 
 	}
 }
 
 void FloodFillIterative(polygon_type poly, int color){
 	std::queue<point_type> q;
-	point_type seed; 
+	point_type seed;
 	seed.x = 0, seed.y = 0;
 	for (int i = 0; i<poly.n; i++)
 	{
@@ -1021,7 +1021,7 @@ void FloodFillIterative(polygon_type poly, int color){
 	}
 	seed.x /= poly.n;
 	seed.y /= poly.n;
-	
+
 	q.push(seed);
 	point_type current, west, east, north, south;
 	while (!q.empty()){
@@ -1076,7 +1076,7 @@ void FillCircle(int r_x, int r_y, int color){
 
 void FloodFillRecursive(polygon_type poly)
 {
-	
+
 	for (int i = 0; i < poly.n; i++){
 		DrawPixel(poly.vertex[i].x, poly.vertex[i].y);
 	}
@@ -1115,33 +1115,33 @@ void main()
 		if (menu_it != menu_item)
 			switch (menu_item){
 			case 21:{
-				CheckMenuItem(menu_draw, 21, MF_CHECKED);
-				CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
-				CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
-				menu_it = menu_item;
-				shape = POLY_SCAN;
-				polygon.n = 0;
-				break;
+						CheckMenuItem(menu_draw, 21, MF_CHECKED);
+						CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
+						CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
+						menu_it = menu_item;
+						shape = POLY_SCAN;
+						polygon.n = 0;
+						break;
 			}
 			case 22:
 			{
-				CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
-				CheckMenuItem(menu_draw, 22, MF_CHECKED);
-				CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
-				menu_it = menu_item;
-				shape = POLY_FLOOD;
-				polygon.n = 0;
-				break;
+					   CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
+					   CheckMenuItem(menu_draw, 22, MF_CHECKED);
+					   CheckMenuItem(menu_draw, 23, MF_UNCHECKED);
+					   menu_it = menu_item;
+					   shape = POLY_FLOOD;
+					   polygon.n = 0;
+					   break;
 			}
 			case 23:
 			{
-				CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
-				CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
-				CheckMenuItem(menu_draw, 23, MF_CHECKED);
+					   CheckMenuItem(menu_draw, 21, MF_UNCHECKED);
+					   CheckMenuItem(menu_draw, 22, MF_UNCHECKED);
+					   CheckMenuItem(menu_draw, 23, MF_CHECKED);
 
-				menu_it = menu_item;
-				shape = CIRCLE;
-				break;
+					   menu_it = menu_item;
+					   shape = CIRCLE;
+					   break;
 			}
 			case 30:
 			case 31:
@@ -1161,22 +1161,22 @@ void main()
 				menu_it = menu_item;
 				break;
 			default:
-			{ 
-				for (int i = 1; i <= 16; i++)
-					CheckMenuItem(menu_color, i, MF_UNCHECKED);
-					CheckMenuItem(menu_color, menu_item, MF_CHECKED);
-				if (menu_item >= 1 && menu_item <= 16)
-					color = menu_item - 1;
+			{
+					   for (int i = 1; i <= 16; i++)
+						   CheckMenuItem(menu_color, i, MF_UNCHECKED);
+					   CheckMenuItem(menu_color, menu_item, MF_CHECKED);
+					   if (menu_item >= 1 && menu_item <= 16)
+						   color = menu_item - 1;
 
-				menu_it = menu_item;
+					   menu_it = menu_item;
 
 			}
 		}
 		SetGraphicsColor(color, numXpixels);
 
 		if (mouse_action == L_MOUSE_DOWN)
-		{  
-			switch (shape) 
+		{
+			switch (shape)
 			{
 			case POLY_FLOOD:
 			case POLY_SCAN:
@@ -1192,17 +1192,17 @@ void main()
 				p0_x = p1_x = mouse_x;
 				p0_y = p1_y = mouse_y;
 				break;
-			}			
+			}
 		}
 		if (mouse_action == L_MOUSE_MOVE_DOWN)
-		{  
+		{
 			if (p1_x != mouse_x || p1_y != mouse_y)
-			{  
+			{
 				switch (shape)
 				{
 				case POLY_FLOOD:
 				case POLY_SCAN:
-					  // Draw new line
+					// Draw new line
 					DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 					p1_x = mouse_x;
 					p1_y = mouse_y;
