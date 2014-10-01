@@ -316,7 +316,6 @@ void DrawerAdapter::InitGraphics()
 	blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	SetBkColor(hdc, RGB(0, 0, 0));
 	SetTextColor(hdc, RGB(255, 255, 255));
-	InitGraf();
 }
 
 void DrawerAdapter::CloseGraphics(void)

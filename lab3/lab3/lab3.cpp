@@ -13,12 +13,20 @@ typedef enum {
 	POLY_SCAN, POLY_FLOOD, CIRCLE, LINE
 } my_shape;
 
+void redraw(std::vector<Entity*> entities, DrawerAdapter adapter) {
+	adapter.ClearGraphicsScreen();
+	for (int i = 0; i < entities.size(); i++) {
+		entities.at(i)->Draw();
+		entities.at(i)->Fill();
+	}
+}
 void main()
 {	
 	DrawerAdapter adapter = DrawerAdapter();
 	int p0_x, p0_y, p1_x, p1_y, menu_it = 0, color = adapter.MY_WHITE;
-	float vxs = 0, vxh = 0.5f, vys = 0, vyh = 0.5f;
+	float x1 = 0, x2 = 500, y1 = 0, y2 = 1000;
 	adapter.InitGraphics();
+	adapter.InitGraf();
 
 	polygon_type polygon;
 	polygon.n = 0;
@@ -36,24 +44,24 @@ void main()
 		{
 			if (strlen(adapter.buffer) >= 2) {
 				if (adapter.buffer[0] == 'x' && adapter.buffer[1] == '1'){
-					vxs = atof(&(adapter.buffer[2]));
+					x1 = atof(&(adapter.buffer[2]));
 				}
 				else if (adapter.buffer[0] == 'x' && adapter.buffer[1] == '2'){
-					vxh = atof(&(adapter.buffer[2]));
+					x2 = atof(&(adapter.buffer[2]));
 				}
 				else if (adapter.buffer[0] == 'y' && adapter.buffer[1] == '1'){
-					vys = atof(&(adapter.buffer[2]));
+					y1 = atof(&(adapter.buffer[2]));
 				}
 				else if (adapter.buffer[0] == 'y' && adapter.buffer[1] == '2'){
-					vyh = atof(&(adapter.buffer[2]));
+					y2 = atof(&(adapter.buffer[2]));
 				}
-				else if (adapter.buffer[0] == 'w' && adapter.buffer[1] == 'i' && adapter.buffer[2] == 'n'){
-					adapter.SetViewport(vxs, vxh, vys, vyh);
-					adapter.ClearGraphicsScreen();
-					for (int i = 0; i <= entities.size() - 1; i++) {
-						entities.at(i)->Draw();
-						entities.at(i)->Fill();
-					}
+				else if (adapter.buffer[0] == 'v' && adapter.buffer[1] == 'p'){
+					adapter.SetViewport(x1, x2, y1, y2);
+					redraw(entities, adapter);
+				}
+				else if (adapter.buffer[0] == 'w' && adapter.buffer[1] == 'n'){
+					adapter.SetWindow(x1, x2, y1, y2);
+					redraw(entities, adapter);
 				}
 			}
 			adapter.ClearString(adapter.buffer);

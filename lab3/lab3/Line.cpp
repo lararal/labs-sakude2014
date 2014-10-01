@@ -22,7 +22,7 @@ void Line::Draw() {
 	y1 = p1.y;
 	x2 = p2.x;
 	y2 = p2.y;
-
+	
 	if (adapter.Clip2D(&x1, &y1, &x2, &y2))
 	{
 		int xi1, yi1, xi2, yi2;
