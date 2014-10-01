@@ -1,8 +1,16 @@
 #include "stdafx.h"
 #include "Entity.h"
 
-Entity::Entity()
+Entity::Entity(DrawerAdapter adapter)
 {
+	this->adapter = adapter;
+}
+
+void Entity::Draw() {
+
+}
+
+void Entity::Fill() {
 
 }
 

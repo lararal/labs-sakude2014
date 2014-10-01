@@ -5,12 +5,14 @@ class Entity
 {
 public:
 	typedef struct {
-		int x, y;
+		float x, y;
 	} point;
 	int color = 0;
+	DrawerAdapter adapter;
 
-	Entity();
+	Entity(DrawerAdapter);
 	~Entity();
-	virtual void Draw(DrawerAdapter) = 0;
+	virtual void Draw();
+	virtual void Fill();
 	void DoTransformation(Matrix2D);
 };

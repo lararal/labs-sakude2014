@@ -5,8 +5,8 @@ class Line :
 {
 public:
 	point p1, p2; //world coordinates
-	Line(int, int, int, int);
-	Line(point, point);
-	void Draw();
+	Line(DrawerAdapter adapter, int, int, int, int);
+	virtual void Draw();
+	virtual void Fill();
 	~Line();
 };

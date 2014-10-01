@@ -6,9 +6,10 @@ class Circle :
 public:
 	point pc;
 	int r;
-	Circle(int, int, int);
-	Circle(point, int);
-	void Draw(DrawerAdapter);
+	Circle(DrawerAdapter, int, int, int);
+	Circle(DrawerAdapter, point, int);
+	virtual void Draw();
+	void Fill();
 	~Circle();
 };
 

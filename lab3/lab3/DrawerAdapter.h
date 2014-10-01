@@ -47,6 +47,12 @@ public:
 	static HWND WinHandle;                /* Client area window handle */
 	static  HPEN hpen;
 	static int menu_item;
+
+	static float x_start, x_end, y_start, y_end, height, width; /* screem bitmap size */
+	static float wxs, wxh, wys, wyh;  /* windows corners variables */
+	static float vxs, vxh, vys, vyh; /* viewport corners variables */
+	static float vwsx, vwsy; /* viewing transformation scale */
+	static int inside, botton, top, right, left;
 	
 	typedef enum {
 		MY_BLACK, MY_BLUE, MY_GREEN, MY_CYAN, MY_RED, MY_MAGENTA,
@@ -65,6 +71,7 @@ public:
 	void MenuBar();
 	void InitGraphics();
 	void CloseGraphics(void);
+	void ClearGraphicsScreen(void);
 	int GetMaxX(void);
 	int GetMaxY(void);
 	void SetGraphicsColor(int new_color, int width);
@@ -99,5 +106,15 @@ public:
 	void FloodFillIterative(polygon_type poly, int color);
 	void FillCircle(int r_x, int r_y, int color);
 		
+	void SetWindow(float x1, float x2, float y1, float y2);
+	void SetViewport(float x1, float x2, float y1, float y2);
+	void ViewingTransformation(float *x, float *y);
+	void NormalizedToDevice(float xn, float yn, int *xd, int *yd);
+	void InverseViewingTransformation(float *x, float *y);
+	void DeviceToNormalized(int xd, int yd, float *xn, float *yn);
+	void XYEdgeIntersection(float *x1, float *x2, float *y1, float *y2, float wy, float *x, float *y);
+	void SetCode2D(float *x, float *y, int *c);
+	bool Clip2D(float *x1, float *y1, float *x2, float *y2);
+	void InitGraf();
 };
 

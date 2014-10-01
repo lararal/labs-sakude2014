@@ -224,6 +224,7 @@ void DrawerAdapter::MenuBar()
 	InsertMenu(menu_draw, 0, MF_STRING, 21, (LPCTSTR)L"&Polygon - ScanLine");
 	AppendMenu(menu_draw, MF_STRING, 22, (LPCTSTR)L"&Polygon - FloodFill");
 	AppendMenu(menu_draw, MF_STRING, 23, (LPCTSTR)L"&Circle");
+	AppendMenu(menu_draw, MF_STRING, 24, (LPCTSTR)L"&Segment");
 	AppendMenu(menu, MF_POPUP, (UINT)menu_color, (LPCTSTR)L"&Color");
 	InsertMenu(menu_color, 0, MF_STRING, 1, (LPCTSTR)L"Black");
 	AppendMenu(menu_color, MF_STRING, 2, (LPCTSTR)L"Blue");
@@ -315,7 +316,7 @@ void DrawerAdapter::InitGraphics()
 	blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	SetBkColor(hdc, RGB(0, 0, 0));
 	SetTextColor(hdc, RGB(255, 255, 255));
-
+	InitGraf();
 }
 
 void DrawerAdapter::CloseGraphics(void)
@@ -352,6 +353,14 @@ void DrawerAdapter::SetGraphicsColor(int new_color, int width)
 		//   delete old pen
 		DeleteObject(hpenOld);
 	}
+}
+
+void DrawerAdapter::ClearGraphicsScreen()
+{
+	SetGraphicsColor(MY_BLACK, GetMaxX());
+	for (int i = 0; i < GetMaxX(); i++)
+		for (int j = 0; j < GetMaxY(); j++)
+			DrawPixel(i, j);
 }
 
 int DrawerAdapter::GetPixels(int x, int y)
@@ -970,7 +979,214 @@ void DrawerAdapter::FillCircle(int r_x, int r_y, int color){
 	}
 }
 
+/************************/
+/* Line Clipping        */
+/************************/
+
+float DrawerAdapter::wxs = 0.0, DrawerAdapter::wxh = 1.0, DrawerAdapter::wys = 0.0, DrawerAdapter::wyh = 1.0;  
+float DrawerAdapter::vxs = 0.0, DrawerAdapter::vxh = 1.0, DrawerAdapter::vys = 0.0, DrawerAdapter::vyh = 1.0;
+int DrawerAdapter::inside = 0, DrawerAdapter::botton = 1, DrawerAdapter::top = 2, DrawerAdapter::right = 4, DrawerAdapter::left = 8;
+float DrawerAdapter::vwsx = 1, DrawerAdapter::vwsy = 1;
+float DrawerAdapter::x_start = 0, DrawerAdapter::x_end = 0, DrawerAdapter::y_start = 0, DrawerAdapter::y_end = 0, DrawerAdapter::height = 0, DrawerAdapter::width = 0;
+
+void DrawerAdapter::SetWindow(float x1, float x2, float y1, float y2)
+{
+	wxs = x1;
+	wxh = x2;
+	wys = y1;
+	wyh = y2;
+	vwsx = (vxh - vxs) / (wxh - wxs);
+	vwsy = (vyh - vys) / (wyh - wys);
+}
+
+void DrawerAdapter::SetViewport(float x1, float x2, float y1, float y2)
+{
+	vxs = x1;
+	vxh = x2;
+	vys = y1;
+	vyh = y2;
+	vwsx = (vxh - vxs) / (wxh - wxs);
+	vwsy = (vyh - vys) / (wyh - wys);
+}
+
+void DrawerAdapter::ViewingTransformation(float *x, float *y)
+{
+	*x = (*x - wxs)*vwsx + vxs;
+	*y = (*y - wys)*vwsy + vys;
+}
+
+void DrawerAdapter::NormalizedToDevice(float xn, float yn, int *xd, int *yd)
+{
+	*xd = (int)(x_start + width*xn);
+	*yd = (int)(y_end - (y_start + height*yn));
+}
+
+void DrawerAdapter::InverseViewingTransformation(float *x, float *y)
+{
+	*x = (*x - vxs) / vwsx + wxs;
+	*y = (*y - vys) / vwsy + wys;
+}
+
+void DrawerAdapter::DeviceToNormalized(int xd, int yd, float *xn, float *yn)
+{
+	*xn = (xd - x_start) / (float)width;
+	*yn = (y_end - yd - y_start) / (float)height;
+}
+
+void DrawerAdapter::XYEdgeIntersection(float *x1, float *x2, float *y1, float *y2,
+	float wy, float *x, float *y)
+{
+	*x = *x1 + (*x2 - *x1)*(wy - *y1) / (*y2 - *y1);
+	*y = wy;
+}
+
+void DrawerAdapter::SetCode2D(float *x, float *y, int *c)
+{
+	*c = inside;
+	if (*x < wxs)
+		*c |= left;
+	else if (*x > wxh)
+		*c |= right;
+	if (*y < wys)
+		*c |= botton;
+	else if (*y > wyh)
+		*c |= top;
+}
+
+bool DrawerAdapter::Clip2D(float *x1, float *y1, float *x2, float *y2)
+{
+	int c, c1, c2;
+	float x, y;
+
+	SetCode2D(x1, y1, &c1);
+	SetCode2D(x2, y2, &c2);
+
+	while ((c1 != inside) || (c2 != inside))
+	{
+		if ((c1&c2) != inside) return false;
+		
+		c = c1;
+		if (c == inside) c = c2;
+
+		if (left & c)
+			XYEdgeIntersection(y1, y2, x1, x2, wxs, &y, &x);
+		else if (right & c)
+			XYEdgeIntersection(y1, y2, x1, x2, wxh, &y, &x);
+		else if (botton & c)
+			XYEdgeIntersection(x1, x2, y1, y2, wys, &x, &y);
+		else if (top & c)
+			XYEdgeIntersection(x1, x2, y1, y2, wyh, &x, &y);
+		if (c == c1)
+		{
+			*x1 = x;
+			*y1 = y;
+			SetCode2D(x1, y1, &c1);
+		}
+		else
+		{
+			*x2 = x;
+			*y2 = y;
+			SetCode2D(x2, y2, &c2);
+		}
+	}
+	return true;
+}
+
+void DrawerAdapter::InitGraf()
+{
+	y_end = (float)GetMaxY();
+	x_end = (float)GetMaxX();
+
+	x_start = 0.0f;
+	y_start = 0.0f;
+	width = (float)(x_end - x_start);
+	height = (float)(y_end - y_start);
+	//MoveAbs2D(0.0f, 0.0f);
+	SetViewport(0.0f, 1.0f, 0.0f, 1.0f);
+	SetWindow(0.0f, (float)x_end, 0.0f, (float)y_end);
+}
+
+/*
+void LineAbs2(float x2, float y2)
+
+{
+	float x1, y1;
+	int xi1, yi1, xi2, yi2;
+
+	x1 = x_current;
+	y1 = y_current;
+	x_current = x2;
+	y_current = y2;
+
+	ViewingTransformation(&x1, &y1);
+	ViewingTransformation(&x2, &y2);
+	NormalizedToDevice(x1, y1, &xi1, &yi1);
+	NormalizedToDevice(x2, y2, &xi2, &yi2);
+	//DrawLine(xi1, yi1, xi2, yi2);
+
+}
+void MoveAbs2D(float x, float y)
+
+{
+	x_current = x;
+	y_current = y;
+}
 
 
+void MoveRel2D(float dx, float dy)
+
+{
+	x_current += dx;
+	y_current += dy;
+}
+void DrawLine2(float x1, float y1, float x2, float y2, int color)
+{
+	SetGraphicsColor(color, 2);
+	MoveAbs2D(x1, y1);
+	LineAbs2(x2, y2);
+
+}
+
+void DrawLine2D(float x2, float y2)
+
+{
+	float x1, y1;
+	int xi1, yi1, xi2, yi2;
+
+	x1 = x_current;
+	y1 = y_current;
+
+	//TO DO <MATRIZ>.DoTransformation(&x1, &y1);
+	//TO DO  Faça Transformacao x2 y2
+
+		if (Clip2D(&x1, &y1, &x2, &y2))
+		{
+		ViewingTransformation(&x1, &y1);
+		//TO DO ViewingTransformation for point 2
+			NormalizedToDevice(x1, y1, &xi1, &yi1);
+		//TO DO NormalizedToDevice for point 2
+			DrawLine(xi1, yi1, xi2, yi2);
+		}
+}
+
+void LineAbs2D(float x, float y)
+
+{
+	DrawLine2D(x, y);
+	x_current = x;
+	y_current = y;
+}
+
+
+void LineRel2D(float dx, float dy)
+
+{
+	dx += x_current;
+	dy += y_current;
+	DrawLine2D(dx, dy);
+	x_current = dx;
+	y_current = dy;
+}
+*/
 
 
