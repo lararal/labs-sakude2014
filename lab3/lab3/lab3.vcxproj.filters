@@ -36,10 +36,10 @@
     <ClInclude Include="Circle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Polygon.h">
+    <ClInclude Include="Matrix2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix2D.h">
+    <ClInclude Include="MyPolygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClCompile Include="Circle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Polygon.cpp">
+    <ClCompile Include="Matrix2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix2D.cpp">
+    <ClCompile Include="MyPolygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

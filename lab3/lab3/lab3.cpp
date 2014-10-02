@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "DrawerAdapter.h"
 #include "Circle.h"
-#include "Polygon.h"
+#include "MyPolygon.h"
 #include "Line.h"
 #include <vector>
 
@@ -28,7 +28,7 @@ void main()
 	float vxs = 0.0, vxh = 0.5f, vys = 0.0, vyh = 0.5f;
 	adapter.InitGraphics();
 	adapter.InitGraf();
-
+	//MyPolygon polygon(adapter);
 	polygon_type polygon;
 	polygon.n = 0;
 	my_shape shape = POLY_SCAN;
@@ -150,6 +150,7 @@ void main()
 			{
 			case POLY_FLOOD:
 			case POLY_SCAN:
+				
 				// Pick first point up 
 				if (polygon.n == 0)
 				{
@@ -206,7 +207,6 @@ void main()
 				p1_x = adapter.mouse_x;
 				p1_y = adapter.mouse_y;
 				Circle* circle = new Circle(adapter, p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
-				//circle->color = color;
 				circle->Draw();
 				circle->Fill();
 				entities.push_back(circle);
@@ -225,22 +225,25 @@ void main()
 			{
 				adapter.DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
 				
-				PolygonNamespace::Polygon poly_test = PolygonNamespace::Polygon(adapter);
+				MyPolygon* polyinsert = new MyPolygon(adapter);
+
 				for (int i = 0; i < polygon.n; i++) {
 					adapter.DrawPixel(polygon.vertex[i].x, polygon.vertex[i].y);
 					Entity::point point;
 					point.x = polygon.vertex[i].x;
 					point.y = polygon.vertex[i].y;
-					poly_test.AddVertex(point);
+					polyinsert->AddVertex(point);
 				}
-				poly_test.color = color;
+				polyinsert->color = color;
 
-				if (shape == POLY_SCAN) poly_test.SetFillMethod(PolygonNamespace::Polygon::FILL_METHOD_SCAN);
-				else if (shape == POLY_FLOOD) poly_test.SetFillMethod(PolygonNamespace::Polygon::FILL_METHOD_FLOOD);
-
-
-				poly_test.Fill();
-
+				if (shape == POLY_SCAN){
+					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_SCAN);
+				}
+				else if (shape == POLY_FLOOD){
+					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_FLOOD);
+				}
+				entities.push_back(polyinsert);
+				polyinsert->Fill();
 				polygon.n = 0;
 			}
 			else if (shape == CIRCLE) {
