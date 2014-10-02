@@ -25,6 +25,7 @@ void main()
 	DrawerAdapter adapter = DrawerAdapter();
 	int p0_x, p0_y, p1_x, p1_y, menu_it = 0, color = adapter.MY_WHITE;
 	float x1 = 0, x2 = 500, y1 = 0, y2 = 1000;
+	float vxs = 0.0, vxh = 0.5f, vys = 0.0, vyh = 0.5f;
 	adapter.InitGraphics();
 	adapter.InitGraf();
 
@@ -204,9 +205,11 @@ void main()
 				adapter.CircleXorBresenham(p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
 				p1_x = adapter.mouse_x;
 				p1_y = adapter.mouse_y;
-				Circle circle_test = Circle(adapter, p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
-				circle_test.color = color;
-				circle_test.Draw();
+				Circle* circle = new Circle(adapter, p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
+				//circle->color = color;
+				circle->Draw();
+				circle->Fill();
+				entities.push_back(circle);
 			}
 			else if (shape == LINE) {
 				adapter.DrawXorLine(p0_x, p0_y, p1_x, p1_y);
@@ -235,14 +238,16 @@ void main()
 				if (shape == POLY_SCAN) poly_test.SetFillMethod(PolygonNamespace::Polygon::FILL_METHOD_SCAN);
 				else if (shape == POLY_FLOOD) poly_test.SetFillMethod(PolygonNamespace::Polygon::FILL_METHOD_FLOOD);
 
+
 				poly_test.Fill();
 
 				polygon.n = 0;
 			}
 			else if (shape == CIRCLE) {
-				Circle circle_test2 = Circle(adapter, p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
-				circle_test2.color = color;
-				circle_test2.Fill();
+				//Circle circle_test2 = Circle(adapter, p0_x, p0_y, adapter.distance(p0_x, p0_y, p1_x, p1_y));
+				//circle_test2.color = color;
+				//circle_test2.Fill();
+				//circle->Fill();
 			}
 			adapter.mouse_action = NO_ACTION;
 		}

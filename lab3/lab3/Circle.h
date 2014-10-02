@@ -5,11 +5,11 @@ class Circle :
 {
 public:
 	point pc;
-	int r;
+	float r;
 	Circle(DrawerAdapter, int, int, int);
 	Circle(DrawerAdapter, point, int);
 	virtual void Draw();
-	void Fill();
+	virtual void Fill();
 	~Circle();
 };
 

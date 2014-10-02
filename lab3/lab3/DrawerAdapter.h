@@ -105,7 +105,8 @@ public:
 	void FloodFillRec(int x, int y);
 	void FloodFillIterative(polygon_type poly, int color);
 	void FillCircle(int r_x, int r_y, int color);
-		
+	void DrawEllipse(int x, int y, int x_radius, int y_radius, int filled);
+
 	void SetWindow(float x1, float x2, float y1, float y2);
 	void SetViewport(float x1, float x2, float y1, float y2);
 	void ViewingTransformation(float *x, float *y);

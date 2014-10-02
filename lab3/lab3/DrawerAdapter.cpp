@@ -298,10 +298,8 @@ void DrawerAdapter::InitGraphics()
 
 	if ((hWnd == NULL))
 	{
-
 		printf("error in CreateWindow ...\n ");
 		exit(1);
-
 	}
 
 	// Sets the visibility state of window 
@@ -360,6 +358,7 @@ void DrawerAdapter::ClearGraphicsScreen()
 	for (int i = 0; i < GetMaxX(); i++)
 		for (int j = 0; j < GetMaxY(); j++)
 			DrawPixel(i, j);
+	SetGraphicsColor(MY_WHITE, GetMaxX());
 }
 
 int DrawerAdapter::GetPixels(int x, int y)
@@ -549,9 +548,50 @@ void DrawerAdapter::CircleBresenham(int xc, int yc, int r) {
 	PlotCircle(xc, yc, x, y);
 }
 
+
 int DrawerAdapter::distance(int x1, int y1, int x2, int y2){
 	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
+
+
+void DrawerAdapter::DrawEllipse(int x, int y, int x_radius, int y_radius, int filled){
+	int x1, y1, x2, y2;
+	//Win32 Ellipse function requires ellipse bounding box as input
+	
+	// calculate the bounding box
+	if (x_radius>0){
+		x1 = x - x_radius;
+		x2 = x + x_radius;
+	}
+	else if (x_radius == 0){// make the ellipse 2 pixels wide (a line)
+		x1 = x;
+		x2 = x + 1;
+	}
+	else return; // wrong radius
+	if (y_radius>0){
+		y1 = y - y_radius;
+		y2 = y + y_radius;
+	}
+	else if (y_radius == 0){ // make the ellipse 2 pixels wide (a line)
+		y1 = y;
+		y2 = y + 1;
+	}
+	else return;
+	if (!filled)
+	{	//Need to select NULL_BRUSH to avoid filling the ellipse
+		HBRUSH brush = (HBRUSH)GetStockObject(NULL_BRUSH);
+		SelectObject(hdc, brush);
+		Ellipse(hdc, x1, y1, x2, y2);  // Draw ellipse
+	}
+	else{// Draw a solid ellipse with a brush of current color 
+		HBRUSH brush = CreateSolidBrush(win_draw_color);
+		SelectObject(hdc, brush);
+		Ellipse(hdc, x1, y1, x2, y2);
+		// remove brush
+		DeleteObject(brush);
+	}
+}
+
 
 LRESULT CALLBACK DrawerAdapter::WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 {
@@ -1104,6 +1144,7 @@ void DrawerAdapter::InitGraf()
 	SetViewport(0.0f, 1.0f, 0.0f, 1.0f);
 	SetWindow(0.0f, (float)x_end, 0.0f, (float)y_end);
 }
+
 
 /*
 void LineAbs2(float x2, float y2)
