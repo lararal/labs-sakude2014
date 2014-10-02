@@ -9,6 +9,7 @@ private:
 public:
 	const static int FILL_METHOD_SCAN = 0;
 	const static int FILL_METHOD_FLOOD = 1;
+	const static int FILL_METHOD_EMPTY = 2;
 
 	std::vector<point> vertices;
 	MyPolygon(DrawerAdapter adapter);
@@ -22,5 +23,6 @@ public:
 	virtual void Fill();
 	bool Pick(int, int, float);
 	void ClipPolygon();
+	bool PointInPoly(float x, float y);
 	~MyPolygon();
 };

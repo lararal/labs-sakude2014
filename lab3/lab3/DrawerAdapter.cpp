@@ -220,10 +220,10 @@ void DrawerAdapter::MenuBar()
 		(UINT)menu_draw,  // menu-item identifier or handle to drop-down menu or submenu
 		(LPCTSTR)L"&Tool" // menu-item content
 		);
-
-	InsertMenu(menu_draw, 0, MF_STRING, 21, (LPCTSTR)L"&Polygon - ScanLine");
-	AppendMenu(menu_draw, MF_STRING, 22, (LPCTSTR)L"&Polygon - FloodFill");
-	AppendMenu(menu_draw, MF_STRING, 23, (LPCTSTR)L"&Circle");
+	InsertMenu(menu_draw, 0, MF_STRING, 21, (LPCTSTR)L"&Polygon - Empty");
+	AppendMenu(menu_draw, MF_STRING, 22, (LPCTSTR)L"&Polygon - ScanFill");
+	AppendMenu(menu_draw, MF_STRING, 23, (LPCTSTR)L"&Polygon - FloodFill");
+	//AppendMenu(menu_draw, MF_STRING, 24, (LPCTSTR)L"&Circle");
 	AppendMenu(menu_draw, MF_STRING, 24, (LPCTSTR)L"&Segment");
 	AppendMenu(menu_draw, MF_STRING, 25, (LPCTSTR)L"&Pick");
 	AppendMenu(menu, MF_POPUP, (UINT)menu_color, (LPCTSTR)L"&Color");

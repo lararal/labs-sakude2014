@@ -15,6 +15,12 @@ Line::Line(DrawerAdapter adapter, int xd1, int yd1, int xd2, int yd2) : Entity(a
 	this->p2.y = y2;
 }
 
+Line::Line(DrawerAdapter adapter, point pw1, point pw2) : Entity(adapter)
+{
+	this->p1 = pw1;
+	this->p2 = pw2;
+}
+
 void Line::Draw() {
 	float x1, y1, x2, y2;
 	

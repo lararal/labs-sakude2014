@@ -10,7 +10,7 @@
 
 
 typedef enum {
-	NONE, POLY_SCAN, POLY_FLOOD, CIRCLE, LINE
+	NONE, POLY_EMPTY, POLY_SCAN, POLY_FLOOD, CIRCLE, LINE
 } my_shape;
 
 void redraw(std::vector<Entity*> entities, DrawerAdapter adapter) {
@@ -37,15 +37,14 @@ void main()
 	float vxs = 0.0, vxh = 0.5f, vys = 0.0, vyh = 0.5f;
 	adapter.InitGraphics();
 	adapter.InitGraf();
-	//MyPolygon polygon(adapter);
 	polygon_type polygon;
 	polygon.n = 0;
-	my_shape shape = POLY_SCAN;
+	my_shape shape = POLY_EMPTY;
 
 	std::vector<Entity*> entities;
 	std::vector<Entity*> pick_list;
 
-	adapter.menu_item = 0;
+	adapter.menu_item = 21;
 	CheckMenuItem(adapter.menu_color, 1, MF_CHECKED);
 	CheckMenuItem(adapter.menu_draw, 21, MF_CHECKED);
 	CheckMenuItem(adapter.menu_draw, 30, MF_CHECKED);
@@ -53,7 +52,7 @@ void main()
 		adapter.CheckGraphicsMsg();
 		if (adapter.key_input == ENTER)	 // Identify Enter
 		{
-			if (shape == NONE)
+			if (shape == NONE && strlen(adapter.buffer) == 0)
 			{
 				for (unsigned int i = 0; i < pick_list.size(); i++) {
 					entities.erase(std::remove(entities.begin(), entities.end(), pick_list.at(i)), entities.end());
@@ -98,21 +97,22 @@ void main()
 				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+
 				menu_it = adapter.menu_item;
-				shape = POLY_SCAN;
+				shape = POLY_EMPTY;
 				polygon.n = 0;
 				clearPickList(&pick_list);
 				break;
 			}
-			case 22:
-			{
+			case 22:{
 				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 22, MF_CHECKED);
 				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+
 				menu_it = adapter.menu_item;
-				shape = POLY_FLOOD;
+				shape = POLY_SCAN;
 				polygon.n = 0;
 				clearPickList(&pick_list);
 				break;
@@ -126,10 +126,25 @@ void main()
 				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
 
 				menu_it = adapter.menu_item;
-				shape = CIRCLE;
+				shape = POLY_FLOOD;
+				polygon.n = 0;
 				clearPickList(&pick_list);
 				break;
 			}
+			/*case 24:
+			{
+				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 24, MF_CHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+
+				menu_it = adapter.menu_item;
+				shape = CIRCLE;
+				clearPickList(&pick_list);
+				break;
+			}*/
 			case 24:
 			{
 				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
@@ -191,7 +206,7 @@ void main()
 			{
 			case POLY_FLOOD:
 			case POLY_SCAN:
-				
+			case POLY_EMPTY:
 				// Pick first point up 
 				if (polygon.n == 0)
 				{
@@ -216,6 +231,7 @@ void main()
 						int old_color = entity_ptr->color;
 						entity_ptr->color = adapter.MY_RED;
 						entity_ptr->Draw();
+						entity_ptr->Fill();
 						entity_ptr->color = old_color;
 					}
 				}
@@ -230,6 +246,7 @@ void main()
 				{
 				case POLY_FLOOD:
 				case POLY_SCAN:
+				case POLY_EMPTY:
 				case LINE:
 					adapter.DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 					p1_x = adapter.mouse_x;
@@ -247,7 +264,7 @@ void main()
 		}
 		else  if (adapter.mouse_action == L_MOUSE_UP)
 		{
-			if (shape == POLY_FLOOD || shape == POLY_SCAN) {
+			if (shape == POLY_FLOOD || shape == POLY_SCAN || shape == POLY_EMPTY) {
 				adapter.DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 				adapter.DDA(p0_x, p0_y, p1_x, p1_y);
 				p0_x = p1_x = adapter.mouse_x;
@@ -278,7 +295,7 @@ void main()
 		}
 		else if (adapter.mouse_action == R_MOUSE_DOWN)
 		{
-			if (shape == POLY_FLOOD || shape == POLY_SCAN)
+			if (shape == POLY_FLOOD || shape == POLY_SCAN || shape == POLY_EMPTY)
 			{
 				//adapter.DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
 				
@@ -298,6 +315,9 @@ void main()
 				}
 				else if (shape == POLY_FLOOD){
 					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_FLOOD);
+				}
+				else if (shape == POLY_EMPTY){
+					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_EMPTY);
 				}
 				entities.push_back(polyinsert);
 

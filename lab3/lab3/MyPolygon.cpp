@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MyPolygon.h"
 #include "PolyFill.h"
-
+#include "Line.h"
 
 MyPolygon::MyPolygon(DrawerAdapter adapter) : Entity(adapter)
 {
@@ -44,6 +44,7 @@ void MyPolygon::Draw(){
 	float x1, y1, x2, y2;
 	int xi1, yi1, xi2, yi2;
 	int xi0, yi0, xin, yin;
+	adapter.SetGraphicsColor(color, adapter.GetMaxX());
 	for (unsigned int i = 0; i < vertices.size() - 1; i++){
 
 		x1 = vertices.at(i).x;
@@ -81,11 +82,14 @@ void MyPolygon::Draw(){
 
 void MyPolygon::Fill(){
 
+	if (this->fillMethod == FILL_METHOD_EMPTY) return;
+
 	polygon_type polygon;
 	edge_list_type list;
 	polygon.n = 0;
 	int xi, yi;
 	float x, y;
+	adapter.SetGraphicsColor(color, adapter.GetMaxX());
 	for (unsigned int i = 0; i < vertices.size(); i++){
 		x = vertices.at(i).x;
 		y = vertices.at(i).y;
@@ -100,7 +104,28 @@ void MyPolygon::Fill(){
 
 bool MyPolygon::Pick(int x, int y, float d)
 {
-	return false;
+	for (unsigned int i = 0; i < vertices.size() - 1; i++){
+		Line line = Line(adapter, vertices.at(i), vertices.at(i + 1));
+		if (line.Pick(x, y, d)) return true;
+	}
+	Line closeLine = Line(adapter, vertices.at(0), vertices.at(vertices.size() - 1));
+	if (closeLine.Pick(x, y, d)) return true;
+
+	return (this->fillMethod != FILL_METHOD_EMPTY) && PointInPoly(x, y);
+}
+
+bool MyPolygon::PointInPoly(float x, float y)
+{
+	float x1, y1;
+	adapter.DeviceToNormalized(x, y, &x1, &y1);
+	adapter.InverseViewingTransformation(&x1, &y1);
+	int i, j, c = 0;
+	for (i = 0, j = vertices.size() - 1; i < vertices.size(); j = i++) {
+		if (((vertices[i].y > y1) != (vertices[j].y > y1)) &&
+			(x1 < (vertices[j].x - vertices[i].x) * (y1 - vertices[i].y) / (vertices[j].y - vertices[i].y) + vertices[i].x))
+			c = !c;
+	}
+	return c;
 }
 
 void MyPolygon::ClipPolygon(){
