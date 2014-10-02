@@ -55,6 +55,7 @@ public:
 	static float vwsx, vwsy; /* viewing transformation scale */
 	static int inside, botton, top, right, left;
 	
+	typedef enum { LEFT, TOP, RIGHT, BOTTOM, LAST } win_edge_type;
 	typedef enum {
 		MY_BLACK, MY_BLUE, MY_GREEN, MY_CYAN, MY_RED, MY_MAGENTA,
 		MY_BROWN, MY_LIGHTGRAY, MY_DARKGRAY, MY_LIGHTBLUE, MY_LIGHTGREEN,
@@ -93,6 +94,7 @@ public:
 	static LRESULT CALLBACK WinProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam);
 	void PolyInsert(edge_list_type &list, int x1, int y1, int x2, int y2);
 	void InsertVertex(polygon_type &poly, int x, int y);
+	void DrawerAdapter::InsertVertex(float_polygon_type &poly, float x, float y);
 	void GetPoint(polygon_type polygon, int k, int &x, int &y);
 	void LoadPolygon(polygon_type &polygon, edge_list_type &list, int &num_Edges);
 	void Include(edge_list_type &list, int &end_Edge, int final_Edge, int scan);
@@ -117,6 +119,11 @@ public:
 	void XYEdgeIntersection(float *x1, float *x2, float *y1, float *y2, float wy, float *x, float *y);
 	void SetCode2D(float *x, float *y, int *c);
 	bool Clip2D(float *x1, float *y1, float *x2, float *y2);
+	bool LineIntersectiom(float_point_type P1, float_point_type P2, win_edge_type edge);
+	bool Visible(float_point_type P, win_edge_type edge);
+	float_point_type Intersection(float_point_type P1, float_point_type P2, win_edge_type edge);
+	void ClipEdge(float_point_type P1, float_point_type P2, win_edge_type edge, float_polygon_type &poly_out);
+	void ClipPolygon(float_polygon_type poly, float_polygon_type &poly_out);
 	void InitGraf();
 };
 

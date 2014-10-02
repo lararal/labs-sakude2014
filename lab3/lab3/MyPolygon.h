@@ -21,5 +21,6 @@ public:
 	virtual void Draw();
 	virtual void Fill();
 	bool Pick(int, int, float);
+	void ClipPolygon();
 	~MyPolygon();
 };

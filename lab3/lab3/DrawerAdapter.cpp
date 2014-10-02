@@ -788,6 +788,15 @@ void DrawerAdapter::InsertVertex(polygon_type &poly, int x, int y)
 		poly.n++;
 	}
 }
+void DrawerAdapter::InsertVertex(float_polygon_type &poly, float x, float y)
+{	// insert x,y as the last element
+	if (poly.n<MAX_POLY)
+	{
+		poly.vertex[poly.n].x = x;
+		poly.vertex[poly.n].y = y;
+		poly.n++;
+	}
+}
 void DrawerAdapter::GetPoint(polygon_type polygon, int k, int &x, int &y)
 {
 	x = polygon.vertex[k].x;
@@ -1090,6 +1099,77 @@ void DrawerAdapter::SetCode2D(float *x, float *y, int *c)
 		*c |= botton;
 	else if (*y > wyh)
 		*c |= top;
+}
+
+bool DrawerAdapter::LineIntersectiom(float_point_type P1, float_point_type P2, win_edge_type edge)
+{
+	switch (edge)
+	{
+	case LEFT: return ((P1.x - wxs)*(P2.x - wxs)<0);
+	case RIGHT: return ((P1.x - wxh)*(P2.x - wxh)<0);
+	case TOP: return ((P1.y - wyh)*(P2.y - wyh)<0);
+	case BOTTOM: return ((P1.y - wys)*(P2.y - wys)<0);
+	}
+	return false;
+}
+bool DrawerAdapter::Visible(float_point_type P, win_edge_type edge)
+{
+	switch (edge)
+	{
+
+	case LEFT: return (P.x >= wxs);
+	case RIGHT: return (P.x <= wxh);
+	case TOP: return (P.y <= wyh);
+	case BOTTOM: return (P.y >= wys);
+	}
+	return false;
+}
+float_point_type DrawerAdapter::Intersection(float_point_type P1, float_point_type P2, win_edge_type edge)
+{
+	float_point_type p;
+	switch (edge)
+	{
+	case LEFT:
+		p.x = wxs;
+		p.y = (P1.y + ((float)(P2.y - P1.y)) / (P2.x - P1.x)*(p.x - P1.x));
+		break;
+	case RIGHT:
+		p.x = wxh;
+		p.y = (P1.y + ((float)(P2.y - P1.y)) / (P2.x - P1.x)*(p.x - P1.x));
+			break;
+	case TOP: 
+		p.y = wyh;
+		p.x = (P1.x + ((float)(P2.x - P1.x)) / (P2.y - P1.y)*(p.y - P1.y));
+		break;
+	case BOTTOM: 
+		p.y = wys;
+		p.x = (P1.x + ((float)(P2.x - P1.x)) / (P2.y - P1.y)*(p.y - P1.y));
+	}
+	return p;
+}
+
+void DrawerAdapter::ClipEdge(float_point_type P1, float_point_type P2, win_edge_type edge, float_polygon_type &poly_out){
+	float_point_type Pi;
+	if (Visible(P1, edge)) // P is at the same side of window
+		InsertVertex(poly_out, P1.x, P1.y);
+	if (LineIntersectiom(P1, P2, edge))
+	{
+		Pi = Intersection(P1, P2, edge);
+		InsertVertex(poly_out, Pi.x, Pi.y);
+	}
+
+}
+
+void DrawerAdapter::ClipPolygon(float_polygon_type poly, float_polygon_type &poly_out){
+	win_edge_type edge;
+	for (int edg = 0; edg<4; edg++){
+		poly_out.n = 0; // Reset poly_out	
+		edge = (win_edge_type)edg;
+		poly.vertex[poly.n] = poly.vertex[0];
+		for (int i = 0; i<poly.n; i++)
+			ClipEdge(poly.vertex[i], poly.vertex[i + 1], edge, poly_out);
+		poly = poly_out;// Copy poly_out to poly
+	}
 }
 
 bool DrawerAdapter::Clip2D(float *x1, float *y1, float *x2, float *y2)
