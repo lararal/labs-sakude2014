@@ -95,6 +95,12 @@ void MyPolygon::Fill(){
 	else if (this->fillMethod == FILL_METHOD_FLOOD) adapter.FloodFillIterative(polygon, color);
 }
 
+bool MyPolygon::Pick(int x, int y, float d)
+{
+	return false;
+}
+
+
 MyPolygon::~MyPolygon()
 {
 }

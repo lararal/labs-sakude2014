@@ -4,6 +4,8 @@
 #define MAX_POLY 50
 #define Max(a,b) ((a>b)?a:b)
 #define Min(a,b) ((a<b)?a:b)
+#define sqr(a) (a*a)
+
 typedef struct {
 			int x,y;
 			} point_type;

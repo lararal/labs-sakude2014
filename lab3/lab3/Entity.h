@@ -12,7 +12,8 @@ public:
 
 	Entity(DrawerAdapter);
 	~Entity();
-	virtual void Draw();
-	virtual void Fill();
+	virtual void Draw() = 0;
+	virtual void Fill() = 0;
+	virtual bool Pick(int, int, float) = 0;
 	void DoTransformation(Matrix2D);
 };

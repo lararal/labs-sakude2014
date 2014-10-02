@@ -218,13 +218,14 @@ void DrawerAdapter::MenuBar()
 		menu,      // handle to menu to be changed
 		MF_POPUP,      // menu-item flags
 		(UINT)menu_draw,  // menu-item identifier or handle to drop-down menu or submenu
-		(LPCTSTR)L"&Draw" // menu-item content
+		(LPCTSTR)L"&Tool" // menu-item content
 		);
 
 	InsertMenu(menu_draw, 0, MF_STRING, 21, (LPCTSTR)L"&Polygon - ScanLine");
 	AppendMenu(menu_draw, MF_STRING, 22, (LPCTSTR)L"&Polygon - FloodFill");
 	AppendMenu(menu_draw, MF_STRING, 23, (LPCTSTR)L"&Circle");
 	AppendMenu(menu_draw, MF_STRING, 24, (LPCTSTR)L"&Segment");
+	AppendMenu(menu_draw, MF_STRING, 25, (LPCTSTR)L"&Pick");
 	AppendMenu(menu, MF_POPUP, (UINT)menu_color, (LPCTSTR)L"&Color");
 	InsertMenu(menu_color, 0, MF_STRING, 1, (LPCTSTR)L"Black");
 	AppendMenu(menu_color, MF_STRING, 2, (LPCTSTR)L"Blue");
@@ -354,11 +355,10 @@ void DrawerAdapter::SetGraphicsColor(int new_color, int width)
 
 void DrawerAdapter::ClearGraphicsScreen()
 {
-	SetGraphicsColor(MY_BLACK, GetMaxX());
-	for (int i = 0; i < GetMaxX(); i++)
-		for (int j = 0; j < GetMaxY(); j++)
-			DrawPixel(i, j);
-	SetGraphicsColor(MY_WHITE, GetMaxX());
+	RECT rect;
+	HBRUSH hbrush = CreateSolidBrush(color_trans_map[MY_BLACK]);
+	GetWindowRect(WinHandle, &rect);
+	FillRect(hdc, &rect, hbrush);
 }
 
 int DrawerAdapter::GetPixels(int x, int y)

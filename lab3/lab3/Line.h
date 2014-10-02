@@ -8,5 +8,6 @@ public:
 	Line(DrawerAdapter adapter, int, int, int, int);
 	virtual void Draw();
 	virtual void Fill();
+	bool Pick(int, int, float);
 	~Line();
 };

@@ -30,12 +30,27 @@ void Line::Draw() {
 		adapter.ViewingTransformation(&x2, &y2);
 		adapter.NormalizedToDevice(x1, y1, &xi1, &yi1);
 		adapter.NormalizedToDevice(x2, y2, &xi2, &yi2);
+		adapter.SetGraphicsColor(color, adapter.GetMaxX());
 		adapter.DDA(xi1, yi1, xi2, yi2);
 	}
 }
 
 void Line::Fill() {
 	
+}
+
+bool Line::Pick(int x, int y, float d)
+{
+	float x1, y1, x2, y2;
+	adapter.DeviceToNormalized(x, y, &x1, &y1);
+	adapter.DeviceToNormalized(x+d, y+d, &x2, &y2);
+	adapter.InverseViewingTransformation(&x1, &y1);
+	adapter.InverseViewingTransformation(&x2, &y2);
+	d = Max(std::abs(x2 - x1), std::abs(y2 - y1));
+	float dist2, xmin, ymin, xmax, ymax;
+	xmin = Min(p1.x, p2.x); ymin = Min(p1.y, p2.y); xmax = Max(p1.x, p2.x); ymax = Max(p1.y, p2.y);
+	dist2 = std::pow((x1 - p1.x)*(p2.y - p1.y) - (y1 - p1.y)*(p2.x - p1.x),2) / (std::pow(p2.x - p1.x,2) + std::pow(p2.y - p1.y,2));
+	return (dist2 <= d*d) && (xmin - d <= x1) && (x1 <= xmax + d) && (ymin - d <= y1) && (y1 <= ymax + d);
 }
 
 Line::~Line()

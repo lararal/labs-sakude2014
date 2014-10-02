@@ -8,8 +8,9 @@ public:
 	float r;
 	Circle(DrawerAdapter, int, int, int);
 	Circle(DrawerAdapter, point, int);
-	virtual void Draw();
-	virtual void Fill();
+	void Draw();
+	void Fill();
+	bool Pick(int, int, float);
 	~Circle();
 };
 

@@ -10,21 +10,29 @@
 
 
 typedef enum {
-	POLY_SCAN, POLY_FLOOD, CIRCLE, LINE
+	NONE, POLY_SCAN, POLY_FLOOD, CIRCLE, LINE
 } my_shape;
 
 void redraw(std::vector<Entity*> entities, DrawerAdapter adapter) {
 	adapter.ClearGraphicsScreen();
-	for (int i = 0; i < entities.size(); i++) {
+	for (unsigned int i = 0; i < entities.size(); i++) {
 		entities.at(i)->Draw();
 		entities.at(i)->Fill();
 	}
 }
+
+void clearPickList(std::vector<Entity*>* pick_list) {
+	for (unsigned int i = 0; i < pick_list->size(); i++) {
+		pick_list->at(i)->Draw();
+	}
+	pick_list->clear();
+}
+
 void main()
 {	
 	DrawerAdapter adapter = DrawerAdapter();
 	int p0_x, p0_y, p1_x, p1_y, menu_it = 0, color = adapter.MY_WHITE;
-	float x1 = 0, x2 = 500, y1 = 0, y2 = 1000;
+	float x1 = 0, x2 = 200, y1 = 0, y2 = 200;
 	float vxs = 0.0, vxh = 0.5f, vys = 0.0, vyh = 0.5f;
 	adapter.InitGraphics();
 	adapter.InitGraf();
@@ -34,6 +42,7 @@ void main()
 	my_shape shape = POLY_SCAN;
 
 	std::vector<Entity*> entities;
+	std::vector<Entity*> pick_list;
 
 	adapter.menu_item = 0;
 	CheckMenuItem(adapter.menu_color, 1, MF_CHECKED);
@@ -43,7 +52,16 @@ void main()
 		adapter.CheckGraphicsMsg();
 		if (adapter.key_input == ENTER)	 // Identify Enter
 		{
-			if (strlen(adapter.buffer) >= 2) {
+			if (shape == NONE)
+			{
+				for (unsigned int i = 0; i < pick_list.size(); i++) {
+					entities.erase(std::remove(entities.begin(), entities.end(), pick_list.at(i)), entities.end());
+					delete pick_list.at(i);
+				}
+				pick_list.clear();
+				redraw(entities, adapter);
+			}
+			else if (strlen(adapter.buffer) >= 2) {
 				if (adapter.buffer[0] == 'x' && adapter.buffer[1] == '1'){
 					x1 = atof(&(adapter.buffer[2]));
 				}
@@ -57,10 +75,12 @@ void main()
 					y2 = atof(&(adapter.buffer[2]));
 				}
 				else if (adapter.buffer[0] == 'v' && adapter.buffer[1] == 'p'){
+					adapter.ClearGraphicsScreen();
 					adapter.SetViewport(x1, x2, y1, y2);
 					redraw(entities, adapter);
 				}
 				else if (adapter.buffer[0] == 'w' && adapter.buffer[1] == 'n'){
+					adapter.ClearGraphicsScreen();
 					adapter.SetWindow(x1, x2, y1, y2);
 					redraw(entities, adapter);
 				}
@@ -68,39 +88,46 @@ void main()
 			adapter.ClearString(adapter.buffer);
 			adapter.key_input = -1;
 		}
+		
 		if (menu_it != adapter.menu_item)
 			switch (adapter.menu_item){
 			case 21:{
-						CheckMenuItem(adapter.menu_draw, 21, MF_CHECKED);
-						CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
-						CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
-						CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
-						menu_it = adapter.menu_item;
-						shape = POLY_SCAN;
-						polygon.n = 0;
-						break;
+				CheckMenuItem(adapter.menu_draw, 21, MF_CHECKED);
+				CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+				menu_it = adapter.menu_item;
+				shape = POLY_SCAN;
+				polygon.n = 0;
+				clearPickList(&pick_list);
+				break;
 			}
 			case 22:
 			{
-					   CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
-					   CheckMenuItem(adapter.menu_draw, 22, MF_CHECKED);
-					   CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
-					   CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
-					   menu_it = adapter.menu_item;
-					   shape = POLY_FLOOD;
-					   polygon.n = 0;
-					   break;
+				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 22, MF_CHECKED);
+				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
+				menu_it = adapter.menu_item;
+				shape = POLY_FLOOD;
+				polygon.n = 0;
+				clearPickList(&pick_list);
+				break;
 			}
 			case 23:
 			{
-					   CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
-					   CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
-					   CheckMenuItem(adapter.menu_draw, 23, MF_CHECKED);
-					   CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 23, MF_CHECKED);
+				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
 
-					   menu_it = adapter.menu_item;
-					   shape = CIRCLE;
-					   break;
+				menu_it = adapter.menu_item;
+				shape = CIRCLE;
+				clearPickList(&pick_list);
+				break;
 			}
 			case 24:
 			{
@@ -108,9 +135,23 @@ void main()
 				CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
 				CheckMenuItem(adapter.menu_draw, 24, MF_CHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_UNCHECKED);
 				
 				menu_it = adapter.menu_item;
 				shape = LINE;
+				clearPickList(&pick_list);
+				break;
+			}
+			case 25:
+			{
+				CheckMenuItem(adapter.menu_draw, 21, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 22, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 23, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 24, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_draw, 25, MF_CHECKED);
+
+				menu_it = adapter.menu_item;
+				shape = NONE;
 				break;
 			}
 			case 30:
@@ -132,14 +173,13 @@ void main()
 				break;
 			default:
 			{
-					   for (int i = 1; i <= 16; i++)
-						   CheckMenuItem(adapter.menu_color, i, MF_UNCHECKED);
-					   CheckMenuItem(adapter.menu_color, adapter.menu_item, MF_CHECKED);
-					   if (adapter.menu_item >= 1 && adapter.menu_item <= 16)
-						   color = adapter.menu_item - 1;
+				for (int i = 1; i <= 16; i++)
+					CheckMenuItem(adapter.menu_color, i, MF_UNCHECKED);
+				CheckMenuItem(adapter.menu_color, adapter.menu_item, MF_CHECKED);
+				if (adapter.menu_item >= 1 && adapter.menu_item <= 16)
+					color = adapter.menu_item - 1;
 
-					   menu_it = adapter.menu_item;
-
+				menu_it = adapter.menu_item;
 			}
 		}
 		adapter.SetGraphicsColor(color, adapter.numXpixels);
@@ -163,6 +203,21 @@ void main()
 			case LINE:
 				p0_x = p1_x = adapter.mouse_x;
 				p0_y = p1_y = adapter.mouse_y;
+				break;
+			case NONE:
+				p0_x = p1_x = adapter.mouse_x;
+				p0_y = p1_y = adapter.mouse_y;
+				int old_size = pick_list.size();
+				for (unsigned int i = 0; i < entities.size(); i++) {
+					Entity* entity_ptr = entities.at(i);
+					if (entity_ptr->Pick(p0_x, p0_y, 5) && std::find(pick_list.begin(), pick_list.end(), entity_ptr) == pick_list.end()) {
+						pick_list.push_back(entity_ptr);
+						int old_color = entity_ptr->color;
+						entity_ptr->color = adapter.MY_RED;
+						entity_ptr->Draw();
+						entity_ptr->color = old_color;
+					}
+				}
 				break;
 			}
 		}
@@ -214,6 +269,7 @@ void main()
 			else if (shape == LINE) {
 				adapter.DrawXorLine(p0_x, p0_y, p1_x, p1_y);
 				Line* line = new Line(adapter, p0_x, p0_y, p1_x, p1_y);
+				line->color = color;
 				line->Draw();
 				entities.push_back(line);
 			}
@@ -251,6 +307,9 @@ void main()
 				//circle_test2.color = color;
 				//circle_test2.Fill();
 				//circle->Fill();
+			}
+			else if (shape == NONE) {
+				clearPickList(&pick_list);
 			}
 			adapter.mouse_action = NO_ACTION;
 		}

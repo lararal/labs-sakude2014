@@ -42,6 +42,10 @@ void Circle::Fill() {
 	//adapter.FillCircle(pc.x, pc.y, color);
 }
 
+bool Circle::Pick(int x, int y , float d){
+	return false;
+}
+
 Circle::~Circle()
 {
 }

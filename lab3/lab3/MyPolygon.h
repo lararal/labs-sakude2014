@@ -20,5 +20,6 @@ public:
 	void clean(void);
 	virtual void Draw();
 	virtual void Fill();
+	bool Pick(int, int, float);
 	~MyPolygon();
 };

@@ -13,6 +13,7 @@
 #define ENTER 13
 #define BACKSPACE 8
 #define ESC 27
+#define DEL 127
 #define NO_ACTION -1
 #define L_MOUSE_MOVE_DOWN 0
 #define L_MOUSE_DOWN 1
