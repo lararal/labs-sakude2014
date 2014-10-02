@@ -24,6 +24,7 @@ void redraw(std::vector<Entity*> entities, DrawerAdapter adapter) {
 void clearPickList(std::vector<Entity*>* pick_list) {
 	for (unsigned int i = 0; i < pick_list->size(); i++) {
 		pick_list->at(i)->Draw();
+		pick_list->at(i)->Fill();
 	}
 	pick_list->clear();
 }
@@ -279,7 +280,7 @@ void main()
 		{
 			if (shape == POLY_FLOOD || shape == POLY_SCAN)
 			{
-				adapter.DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
+				//adapter.DDA(polygon.vertex[0].x, polygon.vertex[0].y, polygon.vertex[polygon.n - 1].x, polygon.vertex[polygon.n - 1].y);
 				
 				MyPolygon* polyinsert = new MyPolygon(adapter);
 
@@ -299,7 +300,10 @@ void main()
 					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_FLOOD);
 				}
 				entities.push_back(polyinsert);
-				polyinsert->Fill();
+
+				redraw(entities, adapter);
+				//polyinsert->Draw();
+				//polyinsert->Fill();
 				polygon.n = 0;
 			}
 			else if (shape == CIRCLE) {
