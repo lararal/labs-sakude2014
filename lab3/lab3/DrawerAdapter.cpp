@@ -355,10 +355,15 @@ void DrawerAdapter::SetGraphicsColor(int new_color, int width)
 
 void DrawerAdapter::ClearGraphicsScreen()
 {
-	RECT rect;
+	SetGraphicsColor(MY_BLACK, GetMaxX());
+	for (int i = 0; i < GetMaxX(); i++)
+		for (int j = 0; j < GetMaxY(); j++)
+		DrawPixel(i, j);
+	SetGraphicsColor(MY_WHITE, GetMaxX());
+	/*RECT rect;
 	HBRUSH hbrush = CreateSolidBrush(color_trans_map[MY_BLACK]);
 	GetWindowRect(WinHandle, &rect);
-	FillRect(hdc, &rect, hbrush);
+	FillRect(hdc, &rect, hbrush);*/
 }
 
 int DrawerAdapter::GetPixels(int x, int y)

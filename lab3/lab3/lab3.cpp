@@ -11,7 +11,6 @@ typedef enum {
 } my_shape;
 
 void redraw(std::vector<Entity*> entities, DrawerAdapter adapter) {
-	adapter.ClearGraphicsScreen();
 	for (unsigned int i = 0; i < entities.size(); i++) {
 		entities.at(i)->Draw();
 		entities.at(i)->Fill();
@@ -56,6 +55,7 @@ void main()
 					delete pick_list.at(i);
 				}
 				pick_list.clear();
+				adapter.ClearGraphicsScreen();
 				redraw(entities, adapter);
 			}
 			else if (strlen(adapter.buffer) >= 2) {
@@ -317,7 +317,7 @@ void main()
 					polyinsert->SetFillMethod(MyPolygon::FILL_METHOD_EMPTY);
 				}
 				entities.push_back(polyinsert);
-
+				adapter.ClearGraphicsScreen();
 				redraw(entities, adapter);
 				//polyinsert->Draw();
 				//polyinsert->Fill();
