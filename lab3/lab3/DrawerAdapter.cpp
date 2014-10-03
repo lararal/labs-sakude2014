@@ -264,7 +264,7 @@ void DrawerAdapter::InitGraphics()
 	WNDCLASS wc;
 	LPCWSTR window_class = (LPCWSTR)L"Window Application";
 	//
-	LPCWSTR window_name = (LPCWSTR)L"Lab 01 CCI-36     ";
+	LPCWSTR window_name = (LPCWSTR)L"Lab 03 CCI-36     ";
 
 	wc.lpszClassName = window_class;  // registration name
 	wc.hInstance = hInst;				// application instance
@@ -288,7 +288,7 @@ void DrawerAdapter::InitGraphics()
 	// Create window
 	hWnd = CreateWindow(
 		window_class,           // Desktop window class name             
-		L"Lab 2 CCI-36",       // window name                 
+		L"Lab 3 CCI-36",       // window name                 
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // Window class style                  
 		0, 0,                //window  top, left corner(origin)
 		500, 500,                   // window X,Y size                                    
@@ -1220,7 +1220,6 @@ void DrawerAdapter::InitGraf()
 	y_start = 0.0f;
 	width = (float)(x_end - x_start);
 	height = (float)(y_end - y_start);
-	//MoveAbs2D(0.0f, 0.0f);
 	SetViewport(0.0f, 1.0f, 0.0f, 1.0f);
 	SetWindow(0.0f, (float)x_end, 0.0f, (float)y_end);
 }
